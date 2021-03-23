@@ -15,6 +15,8 @@ import de.erichseifert.gral.ui.InteractivePanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
@@ -50,9 +52,14 @@ public class Plotter extends Thread {
         
     
     class PlotterGraph extends JFrame{
+        private int width;
+        private int height;
         
         public PlotterGraph() {
-            setSize(1600, 1000);
+            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            this.width = gd.getDisplayMode().getWidth();
+            this.height = gd.getDisplayMode().getHeight();
+            setSize(width, height);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
         }
@@ -137,17 +144,17 @@ public class Plotter extends Thread {
             getContentPane().add(splitPane1);
             
             splitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
-            splitPane1.setDividerLocation(500);
+            splitPane1.setDividerLocation(this.height/2);
             splitPane1.setTopComponent(splitPane2);
             splitPane1.setBottomComponent(splitPane3);
             
             splitPane2.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-            splitPane2.setDividerLocation(800);
+            splitPane2.setDividerLocation(this.width/2);
             splitPane2.setLeftComponent(new InteractivePanel(plt1));
             splitPane2.setRightComponent(new InteractivePanel(plt2));
             
             splitPane3.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-            splitPane3.setDividerLocation(800);
+            splitPane3.setDividerLocation(this.width/2);
             splitPane3.setLeftComponent(new InteractivePanel(plt3));
             splitPane3.setRightComponent(infoPanel);
             
