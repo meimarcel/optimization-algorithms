@@ -10,15 +10,16 @@ package utils;
  * @author meimarcel
  */
 public class Logger {
-    public final String ANSI_RESET = "\u001b[0m";
-    public final String ANSI_BLACK = "\u001b[30m";
-    public final String ANSI_RED = "\u001b[31m";
-    public final String ANSI_GREEN = "\u001b[32m";
-    public final String ANSI_YELLOW = "\u001b[33m";
-    public final String ANSI_BLUE = "\u001B[34m";
-    public final String ANSI_PURPLE = "\u001b[35m";
-    public final String ANSI_CYAN = "\u001b[36m";
-    public final String ANSI_WHITE = "\u001b[37m";
+    private final String OS = System.getProperty("os.name").toLowerCase();
+    public final String ANSI_RESET = (OS.contains("windows")) ? "" : "\u001b[0m";
+    public final String ANSI_BLACK = (OS.contains("windows")) ? "" : "\u001b[30m";
+    public final String ANSI_RED = (OS.contains("windows")) ? "" : "\u001b[31m";
+    public final String ANSI_GREEN = (OS.contains("windows")) ? "" : "\u001b[32m";
+    public final String ANSI_YELLOW = (OS.contains("windows")) ? "" : "\u001b[33m";
+    public final String ANSI_BLUE = (OS.contains("windows")) ? "" : "\u001B[34m";
+    public final String ANSI_PURPLE = (OS.contains("windows")) ? "" : "\u001b[35m";
+    public final String ANSI_CYAN = (OS.contains("windows")) ? "" : "\u001b[36m";
+    public final String ANSI_WHITE = (OS.contains("windows")) ? "" : "\u001b[37m";
     
     public String header() {
         StringBuilder header = new StringBuilder();
