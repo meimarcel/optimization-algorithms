@@ -14,10 +14,12 @@ import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
 import de.erichseifert.gral.ui.InteractivePanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
 import java.util.Random;
@@ -56,9 +58,9 @@ public class Plotter extends Thread {
         private int height;
         
         public PlotterGraph() {
-            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-            this.width = gd.getDisplayMode().getWidth();
-            this.height = gd.getDisplayMode().getHeight();
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            this.width = (int) screenSize.getWidth();
+            this.height = (int) screenSize.getHeight();
             setSize(width, height);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
@@ -163,7 +165,8 @@ public class Plotter extends Thread {
             plt1X.setColor(new Color(255,102,102));
             plt1Y.setColor(new Color(255,102,102));
             plt1.getTitle().setText("FIT OVER ITERATION");
-            plt1.getTitle().setAlignmentY(20);
+            if(!System.getProperty("os.name").toLowerCase().contains("windows"))
+                plt1.getTitle().setAlignmentY(20);
             plt1.setBackground(Color.WHITE);
             plt1.setLineRenderers(dataPlot1, new DefaultLineRenderer2D());
             plt1.getPointRenderers(dataPlot1).get(0).setColor(new Color(0.0f, 0.3f, 1.0f));
@@ -181,7 +184,8 @@ public class Plotter extends Thread {
             plt2X.setColor(new Color(255,102,102));
             plt2Y.setColor(new Color(255,102,102));
             plt2.getTitle().setText("MEAN OVER ITERATION");
-            plt2.getTitle().setAlignmentY(20);
+            if(!System.getProperty("os.name").toLowerCase().contains("windows"))
+                plt2.getTitle().setAlignmentY(20);
             plt2.setBackground(Color.WHITE);
             for(int i = 0; i < dataMeanSize; ++i) {
                 plt2.setLineRenderers(dataPlot2[i], new DefaultLineRenderer2D());
@@ -201,7 +205,8 @@ public class Plotter extends Thread {
             plt3X.setColor(new Color(255,102,102));
             plt3Y.setColor(new Color(255,102,102));
             plt3.getTitle().setText("STANDAR DEVIATION OVER ITERATION");
-            plt3.getTitle().setAlignmentY(20);
+            if(!System.getProperty("os.name").toLowerCase().contains("windows"))
+                plt3.getTitle().setAlignmentY(20);
             plt3.setBackground(Color.WHITE);
             for(int i = 0; i < dataStandardSize; ++i) {
                 plt3.setLineRenderers(dataPlot3[i], new DefaultLineRenderer2D());
