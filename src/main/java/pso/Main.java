@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import utils.FileManager;
 import utils.Logger;
@@ -23,10 +24,12 @@ public class Main {
     private static boolean plotGraph = false;
     private static boolean saveLog = false;
     private static boolean error = false;
+    private static long seed;
     private static Logger LOGGER = new Logger();
         
     
     public static void main(String[] args) {
+        seed = (new Random()).nextLong();
         StringBuilder log = new StringBuilder();
         log.append(LOGGER.header());
         
@@ -37,6 +40,8 @@ public class Main {
         }
         
         if(error) System.exit(1);
+        Random random = new Random();
+        random.setSeed(seed);
         
         
         int neighborhoodSize = -1;
@@ -76,6 +81,7 @@ public class Main {
 
         PSO pso = new PSO(particleNumber, epochs, inertiaWeight, cognitiveWeight, socialWeight, function, beginRange, endRange);
         pso.setStopConditionType(stopCondition);
+        pso.setRandom(random);
 
         if(stopCondition == PSO.StopConditionType.ACCEPTABLE_ERROR) {
             conditionTarget = getDouble("Alvo", -10e9, 10e9);
@@ -174,6 +180,13 @@ public class Main {
                 error = true;
             }
             
+        } else if(values[0].equals("-Seed")) {
+            try {
+                seed = Long.parseLong(values[1]);
+            } catch(NumberFormatException e) {
+                LOGGER.error("Invalid value in '"+var+"'\n");
+                error = true;
+            }
         } else {
             LOGGER.error("Invalid argument '"+var+"'\n");
             error = true;

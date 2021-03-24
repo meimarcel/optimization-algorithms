@@ -39,15 +39,10 @@ public class PSO {
     private double conditionFit;
     private double conditionMaxRadius;
     
-    private static Random rand = null;
+    private static Random rand;
     
     
     public PSO(int particleNumber, int epochs, Function function) {
-        if(rand == null) {
-            rand = new Random();
-            rand.setSeed(200);
-        }
-        
         this.particleNuber = particleNumber;
         this.epochs = epochs;
         this.function = function;
@@ -394,7 +389,7 @@ public class PSO {
     public Particle[] initialize() {
         Particle[] particles = new Particle[this.particleNuber];
         for(int i = 0; i < this.particleNuber; ++i) {
-            particles[i] = new Particle(this.function, this.beginRange, this.endRange);
+            particles[i] = new Particle(this.function, this.beginRange, this.endRange, rand);
             if(particles[i].getBestEval() < this.globalBestEval) {
                 this.globalBestEval = particles[i].getBestEval();
                 this.globalBestPosition = particles[i].getBestPosition();
@@ -446,6 +441,10 @@ public class PSO {
     
     public void setConditionWindow(int window) {
         this.conditionWindow = window;
+    }
+    
+    public void setRandom(Random random) {
+        rand = random;
     }
     
     public boolean stopConditionEvaluete() {

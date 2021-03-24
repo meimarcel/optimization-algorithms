@@ -21,11 +21,8 @@ public class Particle {
     private Function function;
     private static Random rand = null;
     
-    public Particle(Function function, double beginRange, double endRange) {
-        if(rand == null) {
-            rand = new Random();
-            rand.setSeed(200);
-        }
+    public Particle(Function function, double beginRange, double endRange, Random random) {
+        rand = random;
         
         this.function = function;
         this.numerOfVariables = this.function.getNumberOfVariables();
