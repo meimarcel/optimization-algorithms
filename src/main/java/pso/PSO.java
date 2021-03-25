@@ -200,6 +200,34 @@ public class PSO {
             
         }
         
+        double particleDist[] = new double[function.getNumberOfVariables()];
+        double standardDeviation[] =  new double[function.getNumberOfVariables()];
+        
+        dataFit.add(this.globalBestEval);
+        for(Particle p : particles) {
+            double position[] = p.getPosition();
+            for(int j = 0; j < particleDist.length; ++j) {
+                particleDist[j] += position[j];
+            }
+        }
+        for(int j = 0; j < particleDist.length; ++j) {
+            particleDist[j] = particleDist[j] / (double) this.particleNuber;
+        }
+        dataMean.add(particleDist);
+        
+        for(Particle p : particles) {
+            double position[] = p.getPosition();
+            for(int j = 0; j < position.length; ++j) {
+                standardDeviation[j] += (position[j] - particleDist[j]) * (position[j] - particleDist[j]); 
+            }
+        }
+
+        for(int j = 0; j < standardDeviation.length; ++j) {
+            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+        }
+        
+        dataStandardDeviation.add(standardDeviation);
+        
         long stopTime = System.nanoTime();
         System.out.println("");
         log.append("\n");
@@ -359,6 +387,34 @@ public class PSO {
             }
             
         }
+        
+        double particleDist[] = new double[function.getNumberOfVariables()];
+        double standardDeviation[] =  new double[function.getNumberOfVariables()];
+        
+        dataFit.add(this.globalBestEval);
+        for(Particle p : particles) {
+            double position[] = p.getPosition();
+            for(int j = 0; j < particleDist.length; ++j) {
+                particleDist[j] += position[j];
+            }
+        }
+        for(int j = 0; j < particleDist.length; ++j) {
+            particleDist[j] = particleDist[j] / (double) this.particleNuber;
+        }
+        dataMean.add(particleDist);
+        
+        for(Particle p : particles) {
+            double position[] = p.getPosition();
+            for(int j = 0; j < position.length; ++j) {
+                standardDeviation[j] += (position[j] - particleDist[j]) * (position[j] - particleDist[j]); 
+            }
+        }
+
+        for(int j = 0; j < standardDeviation.length; ++j) {
+            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+        }
+        
+        dataStandardDeviation.add(standardDeviation);
         
         long stopTime = System.nanoTime();
         System.out.println("");

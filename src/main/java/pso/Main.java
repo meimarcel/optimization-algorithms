@@ -124,7 +124,7 @@ public class Main {
             log.append(LOGGER.info("Erro: "+conditionError+"\n"));
 
         } else if(stopCondition == PSO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == PSO.StopConditionType.FUNCTION_SLOPE) {
-            log.append(LOGGER.info("Janela de Iterações: "+conditionTarget+"\n"));
+            log.append(LOGGER.info("Janela de Iterações: "+conditionWindow+"\n"));
             log.append(LOGGER.info("Erro: "+conditionError+"\n"));
 
         } else if(stopCondition == PSO.StopConditionType.NORMALIZED_RADIUS) {
@@ -183,6 +183,7 @@ public class Main {
         } else if(values[0].equals("-Seed")) {
             try {
                 seed = Long.parseLong(values[1]);
+                LOGGER.info("Seed setted as "+seed+"\n");
             } catch(NumberFormatException e) {
                 LOGGER.error("Invalid value in '"+var+"'\n");
                 error = true;

@@ -42,6 +42,7 @@ public class Logger {
         header.append("\n");
         header.append("-PlotGraph=true | To save the plotted graphs.\n");
         header.append("-SaveLog=true | To save all the logs.\n");
+        header.append("-Seed=true | To set a seed to the random numbers generator.\n");
         System.out.print(header);
         System.out.println(this.ANSI_RESET);
         
