@@ -24,17 +24,17 @@ public class Logger {
     public String header() {
         StringBuilder header = new StringBuilder();
         System.out.print(this.ANSI_GREEN);
-        header.append("    #########       #########         ####\n");
-        header.append("    #        #     #                #     #\n");
-        header.append("    #         #   #                #       #\n");
-        header.append("    #         #   #               #         #\n");
-        header.append("    #        #     #             #           #\n");
-        header.append("    ########        #######      #           #\n");
-        header.append("    #                      #     #           #\n");
-        header.append("    #                       #     #         #\n");
-        header.append("    #                       #      #       #\n");
-        header.append("    #                      #        #     #\n");
-        header.append("    #             #########          ####\n");
+        header.append("    ##          ##     #           #         ######\n");
+        header.append("    # #        # #     #           #        #      #\n");
+        header.append("    #  #      #  #     #           #       #        #\n");
+        header.append("    #   #    #   #     #           #      #          #\n");
+        header.append("    #    #  #    #     #           #     #            #\n");
+        header.append("    #     ##     #     #############     ##############\n");
+        header.append("    #            #     #           #     #            #\n");
+        header.append("    #            #     #           #     #            #\n");
+        header.append("    #            #     #           #     #            #\n");
+        header.append("    #            #     #           #     #            #\n");
+        header.append("    #            #     #           #     #            #\n");
         header.append("---------------------------------------------------------\n");
         header.append("Developed by Mei Marcel - Email: mei.marcel05@gmail.com\n");
         header.append("---------------------------------------------------------\n");
@@ -42,7 +42,55 @@ public class Logger {
         header.append("\n");
         header.append("-PlotGraph=true | To save the plotted graphs.\n");
         header.append("-SaveLog=true | To save all the logs.\n");
-        header.append("-Seed=true | To set a seed to the random numbers generator.\n");
+        header.append("-Seed=<number> | To set a seed to the random numbers generator. Replace <number> with a number of type long.\n");
+        System.out.print(header);
+        System.out.println(this.ANSI_RESET);
+        
+        return header.toString();
+    }
+    
+    public String headerPSO() {
+        StringBuilder header = new StringBuilder();
+        System.out.print(this.ANSI_GREEN);
+        header.append("         #########       #########         ####\n");
+        header.append("         #        #     #                #     #\n");
+        header.append("         #         #   #                #       #\n");
+        header.append("         #         #   #               #         #\n");
+        header.append("         #        #     #             #           #\n");
+        header.append("         ########        #######      #           #\n");
+        header.append("         #                      #     #           #\n");
+        header.append("         #                       #     #         #\n");
+        header.append("         #                       #      #       #\n");
+        header.append("         #                      #        #     #\n");
+        header.append("         #             #########          ####\n");
+        header.append("---------------------------------------------------------\n");
+        header.append("             PARTICLE SWARM OPTIMIZATION\n");
+        header.append("Developed by Mei Marcel - Email: mei.marcel05@gmail.com\n");
+        header.append("---------------------------------------------------------\n");
+        System.out.print(header);
+        System.out.println(this.ANSI_RESET);
+        
+        return header.toString();
+    }
+    
+    public String headerGA() {
+        StringBuilder header = new StringBuilder();
+        System.out.print(this.ANSI_GREEN);
+        header.append("               ########         ######\n");
+        header.append("             #                 #      #\n");
+        header.append("            #                 #        #\n");
+        header.append("           #                 #          #\n");
+        header.append("          #                 #            #\n");
+        header.append("          #     ########    ##############\n");
+        header.append("          #     #      #    #            #\n");
+        header.append("          #            #    #            #\n");
+        header.append("           #           #    #            #\n");
+        header.append("            #          #    #            #\n");
+        header.append("             ###########    #            #\n");
+        header.append("---------------------------------------------------------\n");
+        header.append("                    GENETIC ALGORITHM\n");
+        header.append("Developed by Mei Marcel - Email: mei.marcel05@gmail.com\n");
+        header.append("---------------------------------------------------------\n");
         System.out.print(header);
         System.out.println(this.ANSI_RESET);
         

@@ -5,6 +5,7 @@
  */
 package pso;
 
+import utils.Function;
 import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -19,45 +20,35 @@ import utils.Logger;
  *
  * @author meimarcel
  */
-public class Main {
+public class MainPSO {
     
-    private static boolean plotGraph = false;
-    private static boolean saveLog = false;
-    private static boolean error = false;
-    private static long seed;
     private static Logger LOGGER = new Logger();
         
     
-    public static void main(String[] args) {
-        seed = (new Random()).nextLong();
+    public static void run(boolean plotGraph, boolean saveLog, long seedDefined, String header) {
         StringBuilder log = new StringBuilder();
-        log.append(LOGGER.header());
+        log.append(header);
+        log.append("\n");
+        log.append(LOGGER.headerPSO());
         
-        if(args.length > 0) {
-            for(String var : args) {
-                setVariables(var);
-            }
-        }
-        
-        if(error) System.exit(1);
         Random random = new Random();
-        random.setSeed(seed);
+        random.setSeed(seedDefined);
         
         
         int neighborhoodSize = -1;
         String psoType = getPSOType();
         Function function = getFunction();
         int particleNumber = getInt("Número de partículas[1 - 1000]", 1, 1000);
-        int epochs = getInt("Número de épocas[1 - 100.000]", 1, 100_000);
+        int epochs = getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
 
         if(psoType.equals("2")) 
             neighborhoodSize = getInt("Tamanho da vizinhança[1 - "+particleNumber+"]", 1, particleNumber);
 
         double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000);
         double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_END_RANGE+")", -100_000, 100_000);
-        double inertiaWeight = getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_INERTIA_WEIGHT+")", -1, 1);
-        double cognitiveWeight = getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_COGNITIVE_WEIGHT+")", -1, 1);
-        double socialWeight = getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_SOCIAL_WEIGHT+")", -1, 1);
+        double inertiaWeight = getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_INERTIA_WEIGHT+")", 0, 100_000);
+        double cognitiveWeight = getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_COGNITIVE_WEIGHT+")", 0, 100_000);
+        double socialWeight = getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_SOCIAL_WEIGHT+")", 0, 100_000);
 
         if(beginRange == -1) 
             beginRange = PSO.DEFAULT_BEGIN_RANGE;
@@ -104,10 +95,10 @@ public class Main {
 
         System.out.println("");
         log.append("\n");
-        log.append(LOGGER.info("PSO Type:"+((psoType.equals("1")) ? "Gbest PSO" : "Lbest PSO")+"\n"));
+        log.append(LOGGER.info("PSO Type: "+((psoType.equals("1")) ? "Gbest PSO" : "Lbest PSO")+"\n"));
         log.append(LOGGER.info("Function: "+function.getFunctionType()+"\n"));
         log.append(LOGGER.info("Number of particles: "+particleNumber+"\n"));
-        log.append(LOGGER.info("Epochs: "+epochs+"\n"));
+        log.append(LOGGER.info("Iteration Limit: "+epochs+"\n"));
 
         if(psoType.equals("2")) 
             log.append(LOGGER.info("Neighborhood Size: "+neighborhoodSize+"\n"));
@@ -151,48 +142,6 @@ public class Main {
         
     }
     
-    public static void setVariables(String var) {
-        String values[] = var.split("=");
-        
-        if(values.length != 2) {
-            LOGGER.error("Bad Format in '"+var+"'\n");
-            error = true;
-            return;
-        }
-        
-        if(values[0].equals("-PlotGraph")) {
-            if(values[1].toLowerCase().equals("true") || values[1].equals("1") || 
-                    values[1].toLowerCase().equals("false") || values[1].equals("0")) {
-                plotGraph = (values[1].toLowerCase().equals("true") || values[1].equals("1"));
-                LOGGER.info("Plot Graph Activated\n");
-            } else {
-                LOGGER.error("Invalid value in '"+var+"'\n");
-                error = true;
-            }
-            
-        } else if(values[0].equals("-SaveLog")) {
-            if(values[1].toLowerCase().equals("true") || values[1].equals("1") || 
-                    values[1].toLowerCase().equals("false") || values[1].equals("0")) {
-                saveLog = (values[1].toLowerCase().equals("true") || values[1].equals("1")); 
-                LOGGER.info("Logs will be saved\n");
-            } else {
-                LOGGER.error("Invalid value in '"+var+"'\n");
-                error = true;
-            }
-            
-        } else if(values[0].equals("-Seed")) {
-            try {
-                seed = Long.parseLong(values[1]);
-                LOGGER.info("Seed setted as "+seed+"\n");
-            } catch(NumberFormatException e) {
-                LOGGER.error("Invalid value in '"+var+"'\n");
-                error = true;
-            }
-        } else {
-            LOGGER.error("Invalid argument '"+var+"'\n");
-            error = true;
-        }
-    }
     
     public static String getPSOType() {
         String psoType = "-1";
@@ -327,7 +276,7 @@ public class Main {
                 continue;
             }
             
-            if(value <= start || value > end) {
+            if(value < start || value > end) {
                 LOGGER.error("Entrada inválida\n");
                 System.out.print(message+": ");
             } else {
@@ -354,7 +303,7 @@ public class Main {
                 continue;
             }
             
-            if(value <= start || value > end) {
+            if(value < start || value > end) {
                 LOGGER.error("Entrada inválida\n");
                 System.out.print(message+": ");
             } else {

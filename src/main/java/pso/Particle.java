@@ -5,6 +5,7 @@
  */
 package pso;
 
+import utils.Function;
 import java.util.Arrays;
 import java.util.Random;
 

@@ -5,6 +5,7 @@
  */
 package pso;
 
+import utils.Function;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,7 +28,7 @@ public class PSO {
     private int particleNuber, epochs, neighborhoodSize;
     private double inertiaWeight, cognitiveWeight, socialWeight, beginRange, endRange;
     private double[] globalBestPosition;
-    private double globalBestEval = Double.MAX_VALUE;
+    private double globalBestEval = Integer.MAX_VALUE;
     private Function function;
     
     private StopConditionType stopCondition;
@@ -110,7 +111,7 @@ public class PSO {
             double particleDist[] = new double[function.getNumberOfVariables()];
             double standardDeviation[] =  new double[function.getNumberOfVariables()];
             
-            log.append(LOGGER.white("Epoch :"+i+" BestEval = "+this.globalBestEval+" BestPositions = ["));
+            log.append(LOGGER.white("Iteration :"+i+" BestEval = "+this.globalBestEval+" BestPositions = ["));
             dataFit.add(this.globalBestEval);
             int end = this.globalBestPosition.length - 1;
             for(int j = 0; j < end; ++j) {
@@ -184,7 +185,7 @@ public class PSO {
             }
             
             if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
-                this.conditionMaxRadius = Double.MIN_VALUE;
+                this.conditionMaxRadius = -1;
                 for(Particle p : particles) {
                     double radius = 0;
                     double positions[] = p.getPosition(); 
@@ -232,7 +233,7 @@ public class PSO {
         System.out.println("");
         log.append("\n");
         log.append(LOGGER.message("---------------------------RESULT---------------------------\n"));
-        log.append(LOGGER.message("Epoch = "+i+"\n"));
+        log.append(LOGGER.message("Iteration = "+i+"\n"));
         log.append(LOGGER.message("Best Eval = "+this.globalBestEval+"\n"));
         log.append(LOGGER.message("Final Best Positions = ["));
         int end = this.globalBestPosition.length - 1;
@@ -275,7 +276,7 @@ public class PSO {
             double particleDist[] = new double[function.getNumberOfVariables()];
             double standardDeviation[] =  new double[function.getNumberOfVariables()];
             
-            log.append(LOGGER.white("Epoch :"+i+" BestEval = "+this.globalBestEval+" BestPositions = ["));
+            log.append(LOGGER.white("Iteration :"+i+" BestEval = "+this.globalBestEval+" BestPositions = ["));
             dataFit.add(this.globalBestEval);
             int end = this.globalBestPosition.length - 1;
             for(int j = 0; j < end; ++j) {
@@ -372,7 +373,7 @@ public class PSO {
             }
             
             if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
-                this.conditionMaxRadius = Double.MIN_VALUE;
+                this.conditionMaxRadius = -1;
                 for(Particle p : particles) {
                     double radius = 0;
                     double positions[] = p.getPosition(); 
@@ -420,7 +421,7 @@ public class PSO {
         System.out.println("");
         log.append("\n");
         log.append(LOGGER.message("---------------------------RESULT---------------------------\n"));
-        log.append(LOGGER.message("Epoch = "+i+"\n"));
+        log.append(LOGGER.message("Iteration = "+i+"\n"));
         log.append(LOGGER.message("Best Eval = "+this.globalBestEval+"\n"));
         log.append(LOGGER.message("Final Best Positions = ["));
         int end = this.globalBestPosition.length - 1;
@@ -454,7 +455,7 @@ public class PSO {
         this.conditionFit = this.globalBestEval;
         
         if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
-            this.conditionBeginDiameter = Double.MIN_VALUE;
+            this.conditionBeginDiameter = -1;
             for(int i = 0; i < this.particleNuber; ++i) {
                 double radius = 0;
                 double positions[] = particles[i].getPosition(); 
@@ -466,7 +467,7 @@ public class PSO {
                     this.conditionBeginDiameter = radius;
                 }
             }
-            this.conditionMaxRadius = this.conditionBeginDiameter;
+            this.conditionMaxRadius = this.conditionBeginDiameter/2.0;
         }
         if(this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
             this.conditionList.add(this.globalBestEval);
