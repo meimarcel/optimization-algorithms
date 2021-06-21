@@ -7,6 +7,7 @@ package pso;
 
 import utils.Function;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import utils.Logger;
@@ -310,29 +311,29 @@ public class PSO {
             dataMean.add(particleDist);
             
             double sumPositions = 0;
-            int particleIndex = 0;
-            for(Particle p : particles) {
-                double velocity[] = p.getVelocity();
-                double personalBestPosition[] = p.getBestPosition();
-                double position[] = p.getPosition();
-                double neighborhoodBestPosition[] = new double[p.getNumberOfVariables()];
+            Particle particlesAux[] = Arrays.copyOf(particles, particles.length);
+            for(int k = 0; k < particles.length; ++k) {
+                double velocity[] = particles[k].getVelocity();
+                double personalBestPosition[] = particles[k].getBestPosition();
+                double position[] = particles[k].getPosition();
+                double neighborhoodBestPosition[] = new double[particles[k].getNumberOfVariables()];
                 double neighborhoodBestFit = Integer.MAX_VALUE;
                 
-                int neighborhoodStart = (this.neighborhoodSize%2 == 0) ? (particleIndex - (this.neighborhoodSize / 2) + 1) : (particleIndex - (this.neighborhoodSize / 2)); 
+                int neighborhoodStart = (this.neighborhoodSize%2 == 0) ? (k - (this.neighborhoodSize / 2) + 1) : (k - (this.neighborhoodSize / 2)); 
                 neighborhoodStart = Math.max(0, neighborhoodStart);
-                int neighborhoodEnd = Math.min(this.particleNuber-1, particleIndex + (this.neighborhoodSize / 2));
+                int neighborhoodEnd = Math.min(this.particleNuber-1, k + (this.neighborhoodSize / 2));
                 
-                for(int j = neighborhoodStart; j < particleIndex; ++j) {
-                    if(particles[j].getBestEval() < neighborhoodBestFit) {
-                        neighborhoodBestFit = particles[j].getBestEval();
-                        neighborhoodBestPosition = particles[j].getBestPosition();
+                for(int j = neighborhoodStart; j < k; ++j) {
+                    if(particlesAux[j].getBestEval() < neighborhoodBestFit) {
+                        neighborhoodBestFit = particlesAux[j].getBestEval();
+                        neighborhoodBestPosition = particlesAux[j].getBestPosition();
                     }
                 }
                 
-                for(int j = particleIndex; j < neighborhoodEnd; ++j) {
-                    if(particles[j].getBestEval() < neighborhoodBestFit) {
-                        neighborhoodBestFit = particles[j].getBestEval();
-                        neighborhoodBestPosition = particles[j].getBestPosition();
+                for(int j = k; j < neighborhoodEnd; ++j) {
+                    if(particlesAux[j].getBestEval() < neighborhoodBestFit) {
+                        neighborhoodBestFit = particlesAux[j].getBestEval();
+                        neighborhoodBestPosition = particlesAux[j].getBestPosition();
                     }
                 }
                 
@@ -346,12 +347,12 @@ public class PSO {
                     standardDeviation[j] += (position[j] - particleDist[j]) * (position[j] - particleDist[j]); 
                 }
                 
-                p.setVelocity(velocity);
-                p.movePositions();
+                particles[k].setVelocity(velocity);
+                particles[k].movePositions();
                 
                 if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
                     double dist = 0;
-                    double currentPosition[] = p.getPosition();
+                    double currentPosition[] = particles[k].getPosition();
                     for(int j = 0; j < currentPosition.length; ++j) {
                          dist += ((currentPosition[j] - position[j]) * (currentPosition[j] - position[j]));
                     }
@@ -359,7 +360,6 @@ public class PSO {
                     sumPositions += dist;
                 }
                 
-                ++particleIndex;
             }
             
             for(int j = 0; j < standardDeviation.length; ++j) {

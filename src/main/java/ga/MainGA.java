@@ -222,7 +222,7 @@ public class MainGA {
         String option;
         Scanner in = new Scanner(System.in);
         System.out.println("\nEscolha o tipo de seleção");
-        System.out.println("1 - Mátodo da roleta");
+        System.out.println("1 - Método da roleta");
         System.out.println("2 - Método do torneio");
         System.out.print("[ENTRADA]: ");
         
