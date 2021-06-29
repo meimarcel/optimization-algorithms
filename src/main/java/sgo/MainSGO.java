@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pso;
+package sgo;
 
 import utils.Function;
 import java.nio.file.FileSystems;
@@ -20,7 +20,7 @@ import utils.Logger;
  *
  * @author meimarcel
  */
-public class MainPSO {
+public class MainSGO {
     
     private static Logger LOGGER = new Logger();
         
@@ -29,96 +29,90 @@ public class MainPSO {
         StringBuilder log = new StringBuilder();
         log.append(header);
         log.append("\n");
-        log.append(LOGGER.headerPSO());
+        log.append(LOGGER.headerSGO());
         
         Random random = new Random();
         random.setSeed(seedDefined);
         
         
-        int neighborhoodSize = -1;
-        String psoType = getPSOType();
         Function function = getFunction();
-        int particleNumber = getInt("Número de partículas[1 - 1000]", 1, 1000);
-        int iterationLimit = getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
+        int playerNumber = getInt("Número de jogadores[1 - 1000]", 1, 1000);
+        int substituteNumber = getInt("Número de substitutos[0 - "+playerNumber+"]", 1, playerNumber);
+        int kicksLimit = getInt("Número máximo de chutes(iterações)[1 - 100.000]", 1, 100_000);
 
-        if(psoType.equals("2")) 
-            neighborhoodSize = getInt("Tamanho da vizinhança[1 - "+particleNumber+"]", 1, particleNumber);
+        double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000, SGO.DEFAULT_BEGIN_RANGE);
+        double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_END_RANGE+")", -100_000, 100_000, SGO.DEFAULT_END_RANGE);
+        double inertiaWeight = getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_INERTIA_WEIGHT+")", 0, 100_000, SGO.DEFAULT_INERTIA_WEIGHT);
+        double cognitiveWeight = getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_COGNITIVE_WEIGHT+")", 0, 100_000, SGO.DEFAULT_COGNITIVE_WEIGHT);
+        double socialWeight = getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_SOCIAL_WEIGHT+")", 0, 100_000, SGO.DEFAULT_SOCIAL_WEIGHT);
+        double moveOffProbability = getDoubleWithDefault("Probabilidade de Move Off(Deixe em branco para manter o valor padrão "+SGO.DEFAULT_MOVE_OFF_PROBABILITY+")", 0, 1, SGO.DEFAULT_MOVE_OFF_PROBABILITY);
+        double moveForwardAfterMoveOffProbability = getDoubleWithDefault("Probabilidade de Move Forward após Move Off (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_MOVE_FORWARD_AFTER_MOVE_OFF+")", 0, 1, SGO.DEFAULT_MOVE_FORWARD_AFTER_MOVE_OFF);
+        double substitutionProbability = getDoubleWithDefault("Probabilidade de substituição (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_SUBSTITUTION_PROBABILITY+")", 0, 1, SGO.DEFAULT_SUBSTITUTION_PROBABILITY);
+        double nonUniformityDegree = getDoubleWithDefault("Grau de não uniformidade (Deixe em branco para manter o valor padrão "+SGO.DEFAULT_NON_UNIFORMITY_DEGREE+")", 0, 100_000, SGO.DEFAULT_NON_UNIFORMITY_DEGREE);
 
-        double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000, PSO.DEFAULT_BEGIN_RANGE);
-        double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_END_RANGE+")", -100_000, 100_000, PSO.DEFAULT_END_RANGE);
-        double inertiaWeight = getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_INERTIA_WEIGHT+")", 0, 100_000, PSO.DEFAULT_INERTIA_WEIGHT);
-        double cognitiveWeight = getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_COGNITIVE_WEIGHT+")", 0, 100_000, PSO.DEFAULT_COGNITIVE_WEIGHT);
-        double socialWeight = getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_SOCIAL_WEIGHT+")", 0, 100_000, PSO.DEFAULT_SOCIAL_WEIGHT);
-
-        PSO.StopConditionType stopCondition = getStopCondition();
+        SGO.StopConditionType stopCondition = getStopCondition();
         double conditionError = 0.0001;
         double conditionTarget = 0;
         int conditionWindow = 20;
 
-        PSO pso = new PSO(particleNumber, iterationLimit, inertiaWeight, cognitiveWeight, socialWeight, function, beginRange, endRange);
-        pso.setStopConditionType(stopCondition);
-        pso.setRandom(random);
+        SGO sgo = new SGO(playerNumber, substituteNumber, kicksLimit, inertiaWeight, 
+            cognitiveWeight, socialWeight, function,
+            beginRange, endRange, moveOffProbability, moveForwardAfterMoveOffProbability,
+            substitutionProbability, nonUniformityDegree);
+        
+        sgo.setStopConditionType(stopCondition);
+        sgo.setRandom(random);
 
-        if(stopCondition == PSO.StopConditionType.ACCEPTABLE_ERROR) {
+        if(stopCondition == SGO.StopConditionType.ACCEPTABLE_ERROR) {
             conditionTarget = getDouble("Alvo", -10e9, 10e9);
             conditionError = getDouble("Error", -10e9, 10e9);
 
-            pso.setConditionTarget(conditionTarget);
-            pso.setConditionError(conditionError);
+            sgo.setConditionTarget(conditionTarget);
+            sgo.setConditionError(conditionError);
 
-        } else if(stopCondition == PSO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == PSO.StopConditionType.FUNCTION_SLOPE) {
+        } else if(stopCondition == SGO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == SGO.StopConditionType.FUNCTION_SLOPE) {
             conditionWindow = getInt("Janela de interações", Integer.MIN_VALUE, Integer.MAX_VALUE);
             conditionError = getDouble("Error", -10e9, 10e9);
 
-            pso.setConditionWindow(conditionWindow);
-            pso.setConditionError(conditionError);
+            sgo.setConditionWindow(conditionWindow);
+            sgo.setConditionError(conditionError);
 
-        } else if(stopCondition == PSO.StopConditionType.NORMALIZED_RADIUS) {
-            conditionError = getDouble("Error", -10e9, 10e9);
-            pso.setConditionError(conditionError);
         }
 
         System.out.println("");
         log.append("\n");
-        log.append(LOGGER.info("PSO Type: "+((psoType.equals("1")) ? "Gbest PSO" : "Lbest PSO")+"\n"));
         log.append(LOGGER.info("Function: "+function.getFunctionType()+"\n"));
-        log.append(LOGGER.info("Number of particles: "+particleNumber+"\n"));
-        log.append(LOGGER.info("Iteration Limit: "+iterationLimit+"\n"));
-
-        if(psoType.equals("2")) 
-            log.append(LOGGER.info("Neighborhood Size: "+neighborhoodSize+"\n"));
-
+        log.append(LOGGER.info("Number of players: "+playerNumber+"\n"));
+        log.append(LOGGER.info("Number of substitutes: "+substituteNumber+"\n"));
+        log.append(LOGGER.info("Kicks(iteration) Limit: "+kicksLimit+"\n"));
         log.append(LOGGER.info("Begin Range: "+beginRange+"\n"));
         log.append(LOGGER.info("End Range: "+endRange+"\n"));
         log.append(LOGGER.info("Inertia Weight: "+inertiaWeight+"\n"));
         log.append(LOGGER.info("Cognitive Weight: "+cognitiveWeight+"\n"));
         log.append(LOGGER.info("Social Weight: "+socialWeight+"\n"));
+        
+        log.append(LOGGER.info("Move Off Probability: "+moveOffProbability+"\n"));
+        log.append(LOGGER.info("Move Forward after Move Off Probability: "+moveForwardAfterMoveOffProbability+"\n"));
+        log.append(LOGGER.info("Substitution Probability: "+substitutionProbability+"\n"));
+        log.append(LOGGER.info("Non-Uniformity Degree: "+nonUniformityDegree+"\n"));
+        
         log.append(LOGGER.info("Stop Condition: "+stopCondition+"\n"));
 
-        if(stopCondition == PSO.StopConditionType.ACCEPTABLE_ERROR) {
+        if(stopCondition == SGO.StopConditionType.ACCEPTABLE_ERROR) {
             log.append(LOGGER.info("Target: "+conditionTarget+"\n"));
             log.append(LOGGER.info("Error: "+conditionError+"\n"));
 
-        } else if(stopCondition == PSO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == PSO.StopConditionType.FUNCTION_SLOPE) {
+        } else if(stopCondition == SGO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == SGO.StopConditionType.FUNCTION_SLOPE) {
             log.append(LOGGER.info("Iteration Window: "+conditionWindow+"\n"));
             log.append(LOGGER.info("Error: "+conditionError+"\n"));
 
-        } else if(stopCondition == PSO.StopConditionType.NORMALIZED_RADIUS) {
-            log.append(LOGGER.info("Error: "+conditionError+"\n"));
         }
         System.out.println("");
 
         if(plotGraph) 
-            pso.setPlotGraph(plotGraph);
+            sgo.setPlotGraph(plotGraph);
 
-        if(psoType.equals("1")) {
-            log.append(pso.runGBestPSO());
-        } else {
-            pso.setNeighborhoodSize(neighborhoodSize);
-            log.append(pso.runLBestPSO());
-        }
-            
-        
+        log.append(sgo.runSGO());
         
         if(saveLog) {
             String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
@@ -127,28 +121,6 @@ public class MainPSO {
         
     }
     
-    
-    public static String getPSOType() {
-        String psoType = "-1";
-        Scanner in = new Scanner(System.in);
-        System.out.println("\nEscolha um o algoritmo PSO");
-        System.out.println("1 - Global Best PSO (gbest PSO)");
-        System.out.println("2 - Local Best PSO (lbest PSO)");
-        System.out.print("[ENTRADA]: ");
-        
-        while(true) {
-            psoType = in.nextLine();
-            psoType = psoType.trim();
-            if(!psoType.equals("1") && !psoType.equals("2")) {
-                LOGGER.error("Opção inválida\n");
-                System.out.print("[ENTRADA]: ");
-            } else {
-                break;
-            }
-        }
-        
-        return psoType;
-    }
     
     public static Function getFunction() {
         String option;
@@ -176,18 +148,17 @@ public class MainPSO {
         }
     }
     
-    public static PSO.StopConditionType getStopCondition() {
+    public static SGO.StopConditionType getStopCondition() {
         String option;
         Scanner in = new Scanner(System.in);
         System.out.println("\nEscolha a condição de parada");
         System.out.println("1 - Somente número de iterações");
         System.out.println("2 - Parar em um erro aceitável");
         System.out.println("3 - Parar quando não houver melhorias");
-        System.out.println("4 - Parar quando o raio do enxame for menor que um erro");
-        System.out.println("5 - Parar quando a inclinação da função objetiva for menor que um erro");
+        System.out.println("4 - Parar quando a inclinação da função objetiva for menor que um erro");
         System.out.print("[ENTRADA]: ");
         
-        List<String> options = Arrays.asList("1","2","3","4","5");
+        List<String> options = Arrays.asList("1","2","3","4");
         while(true) {
             option = in.nextLine();
             option = option.trim();
@@ -200,17 +171,15 @@ public class MainPSO {
         }
         switch(option) {
             case "1":
-                return PSO.StopConditionType.ONLY_ITERATION;
+                return SGO.StopConditionType.ONLY_ITERATION;
             case "2":
-                return PSO.StopConditionType.ACCEPTABLE_ERROR;
+                return SGO.StopConditionType.ACCEPTABLE_ERROR;
             case "3":
-                return PSO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT;
+                return SGO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT;
             case "4":
-                return PSO.StopConditionType.NORMALIZED_RADIUS;
-            case "5":
-                return PSO.StopConditionType.FUNCTION_SLOPE;
+                return SGO.StopConditionType.FUNCTION_SLOPE;
             default:
-                return PSO.StopConditionType.ONLY_ITERATION;
+                return SGO.StopConditionType.ONLY_ITERATION;
         }
     }
     
@@ -254,8 +223,7 @@ public class MainPSO {
             }
             
             try{
-                double number = Double.parseDouble(input);
-                value = number;
+                value = Double.parseDouble(input);
             } catch(NumberFormatException e) {
                 LOGGER.error("Entrada inválida\n");
                 System.out.print(message+": ");

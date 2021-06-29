@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import pso.MainPSO;
+import sgo.MainSGO;
 import utils.Logger;
 
 /**
@@ -43,11 +44,12 @@ public class Main {
         random.setSeed(seed);
         
         String algorithm;
-        List<String> algorithms = Arrays.asList("0","1","2");
+        List<String> algorithms = Arrays.asList("0","1","2", "3");
         while(true) {
             System.out.println("\nEscolha um algoritmo");
             System.out.println("1 - GENETIC ALGORITHM (GA)");
             System.out.println("2 - PARTICLE SWARM OPTIMIZATION (PSO)");
+            System.out.println("3 - SOCCER GAME OPTIMIZATION (SGO)");
             System.out.println("0 - CANCELAR");
             System.out.print("[ENTRADA]: ");
             algorithm = in.nextLine();
@@ -67,6 +69,8 @@ public class Main {
             case "2":
                 MainPSO.run(plotGraph, saveLog, seed, algorithm);
                 break;
+            case "3":
+                MainSGO.run(plotGraph, saveLog, seed, algorithm);
         }
     }
     

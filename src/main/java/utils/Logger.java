@@ -97,6 +97,30 @@ public class Logger {
         return header.toString();
     }
     
+    public String headerSGO() {
+        StringBuilder header = new StringBuilder();
+        System.out.print(this.ANSI_GREEN);
+        header.append("        #########         ########           ####\n");
+        header.append("       #                #                  #     #\n");
+        header.append("      #                #                  #       #\n");
+        header.append("      #               #                  #         #\n");
+        header.append("       #             #                  #           #\n");
+        header.append("        #######      #     ########     #           #\n");
+        header.append("               #     #     #      #     #           #\n");
+        header.append("                #    #            #      #         #\n");
+        header.append("                #     #           #       #       #\n");
+        header.append("               #       #          #        #     #\n");
+        header.append("      #########         ###########         ####\n");
+        header.append("---------------------------------------------------------\n");
+        header.append("             SOCCER GAME OPTIMIZATION\n");
+        header.append("Developed by Mei Marcel - Email: mei.marcel05@gmail.com\n");
+        header.append("---------------------------------------------------------\n");
+        System.out.print(header);
+        System.out.println(this.ANSI_RESET);
+        
+        return header.toString();
+    }
+    
     public String info(String message) {
         String msg = "[INFO] "+message;
         System.out.print(this.ANSI_GREEN+msg+this.ANSI_RESET);

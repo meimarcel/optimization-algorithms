@@ -26,7 +26,7 @@ public class PSO {
     public final Logger LOGGER = new Logger();
     
     private boolean plotGraph = false;
-    private int particleNuber, epochs, neighborhoodSize;
+    private int particleNumber, iterationLimit, neighborhoodSize;
     private double inertiaWeight, cognitiveWeight, socialWeight, beginRange, endRange;
     private double[] globalBestPosition;
     private double globalBestEval = Integer.MAX_VALUE;
@@ -44,9 +44,12 @@ public class PSO {
     private static Random rand;
     
     
-    public PSO(int particleNumber, int epochs, Function function) {
-        this.particleNuber = particleNumber;
-        this.epochs = epochs;
+    public PSO(int particleNumber, int iterationLimit, Function function) {
+        if(rand == null) {
+            rand = new Random();
+        }
+        this.particleNumber = particleNumber;
+        this.iterationLimit = iterationLimit;
         this.function = function;
         this.inertiaWeight = DEFAULT_INERTIA_WEIGHT;
         this.cognitiveWeight = DEFAULT_COGNITIVE_WEIGHT;
@@ -56,15 +59,14 @@ public class PSO {
         
     }
     
-    public PSO(int particleNumber, int epochs, double inertiaWeight, 
+    public PSO(int particleNumber, int iterationLimit, double inertiaWeight, 
             double cognitiveWeight, double socialWeight, Function function) {
         if(rand == null) {
             rand = new Random();
-            rand.setSeed(200);
         }
         
-        this.particleNuber = particleNumber;
-        this.epochs = epochs;
+        this.particleNumber = particleNumber;
+        this.iterationLimit = iterationLimit;
         this.function = function;
         this.inertiaWeight = inertiaWeight;
         this.cognitiveWeight = cognitiveWeight;
@@ -73,16 +75,15 @@ public class PSO {
         this.endRange = DEFAULT_END_RANGE;
     }
     
-    public PSO(int particleNumber, int epochs, double inertiaWeight, 
+    public PSO(int particleNumber, int iterationLimit, double inertiaWeight, 
             double cognitiveWeight, double socialWeight, Function function,
             double beginRange, double endRange) {
         if(rand == null) {
             rand = new Random();
-            rand.setSeed(200);
         }
         
-        this.particleNuber = particleNumber;
-        this.epochs = epochs;
+        this.particleNumber = particleNumber;
+        this.iterationLimit = iterationLimit;
         this.function = function;
         this.inertiaWeight = inertiaWeight;
         this.cognitiveWeight = cognitiveWeight;
@@ -108,7 +109,7 @@ public class PSO {
         log.append("\n");
         log.append(LOGGER.white("---------------------------EXECUTING---------------------------\n"));
         int i = 0;
-        for(; i < this.epochs && this.stopConditionEvaluete(); ++i) {
+        for(; i < this.iterationLimit && this.stopConditionEvaluete(); ++i) {
             double particleDist[] = new double[function.getNumberOfVariables()];
             double standardDeviation[] =  new double[function.getNumberOfVariables()];
             
@@ -141,7 +142,7 @@ public class PSO {
             }
             
             for(int j = 0; j < particleDist.length; ++j) {
-                particleDist[j] = particleDist[j] / (double) this.particleNuber;
+                particleDist[j] = particleDist[j] / (double) this.particleNumber;
             }
             dataMean.add(particleDist);
             
@@ -176,13 +177,13 @@ public class PSO {
             }
             
             for(int j = 0; j < standardDeviation.length; ++j) {
-                standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+                standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNumber);
             }
             dataStandardDeviation.add(standardDeviation);
             
             
             if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
-                this.conditionList.add(sumPositions / (double) this.particleNuber);
+                this.conditionList.add(sumPositions / (double) this.particleNumber);
             }
             
             if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
@@ -213,7 +214,7 @@ public class PSO {
             }
         }
         for(int j = 0; j < particleDist.length; ++j) {
-            particleDist[j] = particleDist[j] / (double) this.particleNuber;
+            particleDist[j] = particleDist[j] / (double) this.particleNumber;
         }
         dataMean.add(particleDist);
         
@@ -225,7 +226,7 @@ public class PSO {
         }
 
         for(int j = 0; j < standardDeviation.length; ++j) {
-            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNumber);
         }
         
         dataStandardDeviation.add(standardDeviation);
@@ -273,7 +274,7 @@ public class PSO {
         log.append("\n");
         log.append(LOGGER.white("---------------------------EXECUTING---------------------------\n"));
         int i = 0;
-        for(; i < this.epochs && this.stopConditionEvaluete(); ++i) {
+        for(; i < this.iterationLimit && this.stopConditionEvaluete(); ++i) {
             double particleDist[] = new double[function.getNumberOfVariables()];
             double standardDeviation[] =  new double[function.getNumberOfVariables()];
             
@@ -306,7 +307,7 @@ public class PSO {
             }
             
             for(int j = 0; j < particleDist.length; ++j) {
-                particleDist[j] = particleDist[j] / (double) this.particleNuber;
+                particleDist[j] = particleDist[j] / (double) this.particleNumber;
             }
             dataMean.add(particleDist);
             
@@ -321,7 +322,7 @@ public class PSO {
                 
                 int neighborhoodStart = (this.neighborhoodSize%2 == 0) ? (k - (this.neighborhoodSize / 2) + 1) : (k - (this.neighborhoodSize / 2)); 
                 neighborhoodStart = Math.max(0, neighborhoodStart);
-                int neighborhoodEnd = Math.min(this.particleNuber-1, k + (this.neighborhoodSize / 2));
+                int neighborhoodEnd = Math.min(this.particleNumber-1, k + (this.neighborhoodSize / 2));
                 
                 for(int j = neighborhoodStart; j < k; ++j) {
                     if(particlesAux[j].getBestEval() < neighborhoodBestFit) {
@@ -363,13 +364,13 @@ public class PSO {
             }
             
             for(int j = 0; j < standardDeviation.length; ++j) {
-                standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+                standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNumber);
             }
             dataStandardDeviation.add(standardDeviation);
             
             
             if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
-                this.conditionList.add(sumPositions / (double) this.particleNuber);
+                this.conditionList.add(sumPositions / (double) this.particleNumber);
             }
             
             if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
@@ -400,7 +401,7 @@ public class PSO {
             }
         }
         for(int j = 0; j < particleDist.length; ++j) {
-            particleDist[j] = particleDist[j] / (double) this.particleNuber;
+            particleDist[j] = particleDist[j] / (double) this.particleNumber;
         }
         dataMean.add(particleDist);
         
@@ -412,7 +413,7 @@ public class PSO {
         }
 
         for(int j = 0; j < standardDeviation.length; ++j) {
-            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNuber);
+            standardDeviation[j] = Math.sqrt(standardDeviation[j] / (double) this.particleNumber);
         }
         
         dataStandardDeviation.add(standardDeviation);
@@ -444,8 +445,8 @@ public class PSO {
     }
     
     public Particle[] initialize() {
-        Particle[] particles = new Particle[this.particleNuber];
-        for(int i = 0; i < this.particleNuber; ++i) {
+        Particle[] particles = new Particle[this.particleNumber];
+        for(int i = 0; i < this.particleNumber; ++i) {
             particles[i] = new Particle(this.function, this.beginRange, this.endRange, rand);
             if(particles[i].getBestEval() < this.globalBestEval) {
                 this.globalBestEval = particles[i].getBestEval();
@@ -456,7 +457,7 @@ public class PSO {
         
         if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
             this.conditionBeginDiameter = -1;
-            for(int i = 0; i < this.particleNuber; ++i) {
+            for(int i = 0; i < this.particleNumber; ++i) {
                 double radius = 0;
                 double positions[] = particles[i].getPosition(); 
                 for(int j = 0; j < positions.length; ++j) {
@@ -506,8 +507,8 @@ public class PSO {
     
     public boolean stopConditionEvaluete() {
         switch(this.stopCondition) {
-            case ONLY_EPOCH:
-                return StopCondition.onlyEpoch();
+            case ONLY_ITERATION:
+                return StopCondition.onlyIteration();
             case ACCEPTABLE_ERROR:
                 return StopCondition.acceptableError(this.conditionTarget, this.conditionError, this.conditionFit);
             case NUMBER_OF_ITERATION_IMPROVEMENT:
@@ -517,12 +518,12 @@ public class PSO {
             case FUNCTION_SLOPE:
                 return StopCondition.functionSlope(this.conditionWindow, this.conditionError, this.conditionList);
             default:
-                return StopCondition.onlyEpoch();
+                return StopCondition.onlyIteration();
         }
     }
     
     public enum StopConditionType {
-        ONLY_EPOCH,
+        ONLY_ITERATION,
         ACCEPTABLE_ERROR,
         NUMBER_OF_ITERATION_IMPROVEMENT,
         NORMALIZED_RADIUS,

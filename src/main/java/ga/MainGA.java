@@ -37,26 +37,14 @@ public class MainGA {
         int iterationLimit = getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
         Function function = getFunction();
 
-        double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+GA.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000);
-        double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+GA.DEFAULT_END_RANGE+")", -100_000, 100_000);
-        double crossoverProbability = getDoubleWithDefault("Taxa de crossover[0.0 - 1.0] (Deixe em branco para manter o valor padrão "+GA.DEFAULT_CROSSOVER_PROBABILITY+")", 0, 1);
-        double mutationProbability = getDoubleWithDefault("Taxa de mutação[0.0 - 1.0] (Deixe em branco para manter o valor padrão "+GA.DEFAULT_MUTATION_PROBABILITY+")", 0, 1);
+        double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+GA.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000, GA.DEFAULT_BEGIN_RANGE);
+        double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+GA.DEFAULT_END_RANGE+")", -100_000, 100_000, GA.DEFAULT_END_RANGE);
+        double crossoverProbability = getDoubleWithDefault("Taxa de crossover[0.0 - 1.0] (Deixe em branco para manter o valor padrão "+GA.DEFAULT_CROSSOVER_PROBABILITY+")", 0, 1, GA.DEFAULT_CROSSOVER_PROBABILITY);
+        double mutationProbability = getDoubleWithDefault("Taxa de mutação[0.0 - 1.0] (Deixe em branco para manter o valor padrão "+GA.DEFAULT_MUTATION_PROBABILITY+")", 0, 1, GA.DEFAULT_MUTATION_PROBABILITY);
         int elitism = getInt("Elitismo[0 - "+numberOfPopulation+"] (Número de indivíduos a serem passados para pŕoxima geração)", 0, numberOfPopulation);
         
         GA.CrossoverType crossoverType = getCrossoverType();
         GA.SelectionType selectionType = getSelectionType();
-        
-        if(beginRange == -1) 
-            beginRange = GA.DEFAULT_BEGIN_RANGE;
-
-        if(endRange == -1) 
-            endRange = GA.DEFAULT_END_RANGE;
-
-        if(crossoverProbability == -1) 
-            crossoverProbability = GA.DEFAULT_CROSSOVER_PROBABILITY;
-
-        if(mutationProbability == -1) 
-            mutationProbability = GA.DEFAULT_MUTATION_PROBABILITY;
 
         GA.StopConditionType stopCondition = getStopCondition();
         double conditionError = 0.0001;
@@ -98,12 +86,12 @@ public class MainGA {
         log.append(LOGGER.info("Selectio Type: "+selectionType+"\n"));
 
         if(stopCondition == GA.StopConditionType.ACCEPTABLE_ERROR) {
-            log.append(LOGGER.info("Alvo: "+conditionTarget+"\n"));
-            log.append(LOGGER.info("Erro: "+conditionError+"\n"));
+            log.append(LOGGER.info("Target: "+conditionTarget+"\n"));
+            log.append(LOGGER.info("Error: "+conditionError+"\n"));
 
         } else if(stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == GA.StopConditionType.FUNCTION_SLOPE || stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) {
-            log.append(LOGGER.info("Janela de Iterações: "+conditionWindow+"\n"));
-            log.append(LOGGER.info("Erro: "+conditionError+"\n"));
+            log.append(LOGGER.info("Iteration Window: "+conditionWindow+"\n"));
+            log.append(LOGGER.info("Error: "+conditionError+"\n"));
 
         }
         System.out.println("");
@@ -149,7 +137,7 @@ public class MainGA {
         String option;
         Scanner in = new Scanner(System.in);
         System.out.println("\nEscolha a condição de parada");
-        System.out.println("1 - Somente número de épocas");
+        System.out.println("1 - Somente número de iterações");
         System.out.println("2 - Parar em um erro aceitável");
         System.out.println("3 - Parar quando não houver melhorias");
         System.out.println("4 - Parar quando não houver melhorias na população");
@@ -169,7 +157,7 @@ public class MainGA {
         }
         switch(option) {
             case "1":
-                return GA.StopConditionType.ONLY_EPOCH;
+                return GA.StopConditionType.ONLY_ITERATION;
             case "2":
                 return GA.StopConditionType.ACCEPTABLE_ERROR;
             case "3":
@@ -179,7 +167,7 @@ public class MainGA {
             case "5":
                 return GA.StopConditionType.FUNCTION_SLOPE;
             default:
-                return GA.StopConditionType.ONLY_EPOCH;
+                return GA.StopConditionType.ONLY_ITERATION;
         }
     }
     
@@ -274,8 +262,8 @@ public class MainGA {
         return value;
     }
     
-    public static double getDoubleWithDefault(String message, double start, double end) {
-        double value = -1;
+    public static double getDoubleWithDefault(String message, double start, double end, double defaultValue) {
+        double value = defaultValue;
         Scanner in = new Scanner(System.in);
         System.out.print("\n"+message+": ");
         
@@ -287,7 +275,8 @@ public class MainGA {
             }
             
             try{
-                value = Double.parseDouble(input);
+                double number = Double.parseDouble(input);
+                value = number;
             } catch(NumberFormatException e) {
                 LOGGER.error("Entrada inválida\n");
                 System.out.print(message+": ");

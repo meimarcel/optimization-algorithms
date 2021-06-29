@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ga;
+package sgo;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @author meimarcel
  */
 public class StopCondition {
-     public static boolean onlyIteration() {
+    public static boolean onlyIteration() {
         return true;
     }
     
@@ -20,7 +20,7 @@ public class StopCondition {
         return (Math.abs(target - fit) > error);
     }
     
-    public static boolean numberOfIterationImprovmentPopulation(int window, double error, List<Double> averageMovementList) {
+    public static boolean numberOfIterationImprovment(int window, double error, List<Double> averageMovementList) {
         if(averageMovementList.size() < window) {
             return true;
         } else {
@@ -28,21 +28,6 @@ public class StopCondition {
             int end = averageMovementList.size() - 1;
             for(; start < end; ++start) {
                 if(Math.abs(averageMovementList.get(start) - averageMovementList.get(start + 1)) > error) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-    
-    public static boolean numberOfIterationImprovment(int window, double error, List<Double> fitList) {
-        if(fitList.size() < window) {
-            return true;
-        } else {
-            int start = fitList.size() - window;
-            int end = fitList.size() - 1;
-            for(; start < end; ++start) {
-                if(Math.abs(fitList.get(start) - fitList.get(start + 1)) > error) {
                     return true;
                 }
             }

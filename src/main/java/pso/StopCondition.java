@@ -12,7 +12,7 @@ import java.util.List;
  * @author meimarcel
  */
 public class StopCondition {
-    public static boolean onlyEpoch() {
+    public static boolean onlyIteration() {
         return true;
     }
     

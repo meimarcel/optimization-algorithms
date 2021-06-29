@@ -432,8 +432,8 @@ public class GA {
     
     private boolean stopConditionEvaluete() {
         switch(this.stopCondition) {
-            case ONLY_EPOCH:
-                return StopCondition.onlyEpoch();
+            case ONLY_ITERATION:
+                return StopCondition.onlyIteration();
             case ACCEPTABLE_ERROR:
                 return StopCondition.acceptableError(this.conditionTarget, this.conditionError, this.conditionFit);
             case NUMBER_OF_ITERATION_IMPROVEMENT:
@@ -443,7 +443,7 @@ public class GA {
             case FUNCTION_SLOPE:
                 return StopCondition.functionSlope(this.conditionWindow, this.conditionError, this.conditionList);
             default:
-                return StopCondition.onlyEpoch();
+                return StopCondition.onlyIteration();
         }
     }
     
@@ -457,7 +457,7 @@ public class GA {
     
         
     public enum StopConditionType {
-        ONLY_EPOCH,
+        ONLY_ITERATION,
         ACCEPTABLE_ERROR,
         NUMBER_OF_ITERATION_IMPROVEMENT,
         NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION,
