@@ -114,7 +114,6 @@ public class SGO {
     
     public String runSGO() {
         StringBuilder log = new StringBuilder();
-        long startTime = System.nanoTime();
         List<Double> dataFit = new ArrayList<>();
         List<double[]> dataMean = new ArrayList<>();
         List<double[]> dataStandardDeviation = new ArrayList<>();
@@ -129,6 +128,7 @@ public class SGO {
         
         log.append("\n");
         log.append(LOGGER.white("---------------------------EXECUTING---------------------------\n"));
+        long startTime = System.nanoTime();
         int i = 0;
         for(; i < this.kicksLimit && this.stopConditionEvaluete(); ++i) {
             double playerDist[] = new double[function.getNumberOfVariables()];
@@ -283,6 +283,106 @@ public class SGO {
         return log.toString();
     }
     
+    public String runSGOFile(int testNumber) {
+        StringBuilder log = new StringBuilder();
+            
+        if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+            this.conditionList = new ArrayList<>();
+        }
+        
+        Player[] players = this.initialize();
+        List<Player> substitutes = this.initializeSubstitutes(players);
+        
+        long startTime = System.nanoTime();
+        int moveOffExecuted = 0;
+        int substitutionsExecuted = 0;
+        int i = 0;
+        for(; i < this.kicksLimit && this.stopConditionEvaluete(); ++i) {
+            double sumPositions = 0;
+            for(Player p : players) {
+                double personalBestPosition[] = p.getBestPosition();
+                double position[] = p.getPosition();
+                
+                if(rand.nextDouble() <= this.moveOffProbability) {
+                    p.setPosition(this.moveOff(position, i));
+                    if(rand.nextDouble() <= this.moveForwardAfterMoveOffProbability) {
+                        p.setPosition(this.moveForward(p.getPosition(), personalBestPosition));
+                    }
+                    ++moveOffExecuted;
+                } else {
+                    p.setPosition(this.moveForward(position, personalBestPosition));
+                }
+                
+                if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                    double dist = 0;
+                    double currentPosition[] = p.getPosition();
+                    for(int j = 0; j < currentPosition.length; ++j) {
+                         dist += ((currentPosition[j] - position[j]) * (currentPosition[j] - position[j]));
+                    }
+                    dist = Math.sqrt(dist);
+                    sumPositions += dist;
+                }
+                
+                p.calculatePersonalBest();
+                if(p.getBestEval() < this.globalBestEval) {
+                    this.globalBestEval = p.getBestEval();
+                    this.globalBestPosition = p.getBestPosition();
+                }
+            }
+            
+            if(rand.nextDouble() <= this.substitutionProbability) {
+                int playerIndex = rand.nextInt(this.playerNumber);
+                int substituteIndex = rand.nextInt(this.substituteNumber);
+                Player substitute = substitutes.get(substituteIndex);
+                if(substitute.getBestEval() < players[playerIndex].getBestEval()) {
+                    players[playerIndex].setPosition(substitute.getBestPosition());
+                    players[playerIndex].setBestPosition(substitute.getBestPosition());
+                    players[playerIndex].setBestEval(substitute.getBestEval());
+                }
+                ++substitutionsExecuted;
+            }
+            
+            Arrays.sort(players);
+            int playerIndex = 0;
+            for(int j = 0; j < this.substituteNumber; ++j) {
+                if(substitutes.get(j).getBestEval() > players[playerIndex].getBestEval()) {
+                    substitutes.add(j, new Player(this.function, players[playerIndex].getBestPosition(), players[playerIndex].getBestEval(), rand));
+                    ++playerIndex;
+                    substitutes.remove(this.substituteNumber);
+                }
+            }
+            
+            this.conditionFit = this.globalBestEval;
+            if(this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+                this.conditionList.add(this.globalBestEval);
+            }    
+            
+            if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                this.conditionList.add(sumPositions / (double) this.playerNumber);
+            }
+            
+            
+        }
+        long stopTime = System.nanoTime();
+        log.append(LOGGER.message("Test: "+testNumber+"\n"));
+        log.append(LOGGER.message("Best Eval = "+this.globalBestEval+"\n"));
+        log.append(LOGGER.message("Substitution Eval = "+substitutes.get(0).getBestEval()+"\n"));
+        log.append(LOGGER.message("Move Offs = "+moveOffExecuted+"\n"));
+        log.append(LOGGER.message("Substitutions = "+substitutionsExecuted+"\n"));
+        log.append(LOGGER.message("Final Best Positions = ["));
+        int end = this.globalBestPosition.length - 1;
+        System.out.print(LOGGER.ANSI_CYAN);
+        for(int j = 0; j < end; ++j) {
+            log.append(this.globalBestPosition[j]).append(", ");
+            System.out.print(this.globalBestPosition[j]+", ");
+        }
+        log.append(this.globalBestPosition[end]).append("] ");
+        System.out.print(this.globalBestPosition[end]+"] ");
+        log.append(LOGGER.message("Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
+        
+        return log.toString();
+    }
+    
     public Player[] initialize() {
         Player[] players = new Player[this.playerNumber];
         for(int i = 0; i < this.playerNumber; ++i) {
@@ -360,6 +460,10 @@ public class SGO {
     
     public void setRandom(Random random) {
         rand = random;
+    }
+    
+    public double getGlobalBestEval() {
+        return this.globalBestEval;
     }
     
     public boolean stopConditionEvaluete() {

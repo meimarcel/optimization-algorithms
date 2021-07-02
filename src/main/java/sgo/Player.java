@@ -92,6 +92,6 @@ public class Player implements Comparable<Player> {
 
     @Override
     public int compareTo(Player p) {
-         return (this.bestEval < p.bestEval) ? -1 : 1;
+         return Double.compare(this.bestEval, p.bestEval);
     }
 }

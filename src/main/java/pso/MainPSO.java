@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.Scanner;
 import utils.FileManager;
 import utils.Logger;
+import utils.Utils;
 
 /**
  *
@@ -37,18 +38,18 @@ public class MainPSO {
         
         int neighborhoodSize = -1;
         String psoType = getPSOType();
-        Function function = getFunction();
-        int particleNumber = getInt("Número de partículas[1 - 1000]", 1, 1000);
-        int iterationLimit = getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
+        Function function = Utils.getFunction();
+        int particleNumber = Utils.getInt("Número de partículas[1 - 1000]", 1, 1000);
+        int iterationLimit = Utils.getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
 
         if(psoType.equals("2")) 
-            neighborhoodSize = getInt("Tamanho da vizinhança[1 - "+particleNumber+"]", 1, particleNumber);
+            neighborhoodSize = Utils.getInt("Tamanho da vizinhança[1 - "+particleNumber+"]", 1, particleNumber);
 
-        double beginRange = getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000, PSO.DEFAULT_BEGIN_RANGE);
-        double endRange = getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_END_RANGE+")", -100_000, 100_000, PSO.DEFAULT_END_RANGE);
-        double inertiaWeight = getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_INERTIA_WEIGHT+")", 0, 100_000, PSO.DEFAULT_INERTIA_WEIGHT);
-        double cognitiveWeight = getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_COGNITIVE_WEIGHT+")", 0, 100_000, PSO.DEFAULT_COGNITIVE_WEIGHT);
-        double socialWeight = getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_SOCIAL_WEIGHT+")", 0, 100_000, PSO.DEFAULT_SOCIAL_WEIGHT);
+        double beginRange = Utils.getDoubleWithDefault("Limite inferior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_BEGIN_RANGE+")", -100_000, 100_000, PSO.DEFAULT_BEGIN_RANGE);
+        double endRange = Utils.getDoubleWithDefault("Limite superior (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_END_RANGE+")", -100_000, 100_000, PSO.DEFAULT_END_RANGE);
+        double inertiaWeight = Utils.getDoubleWithDefault("Peso de inécia (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_INERTIA_WEIGHT+")", 0, 100_000, PSO.DEFAULT_INERTIA_WEIGHT);
+        double cognitiveWeight = Utils.getDoubleWithDefault("Peso cognitivo (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_COGNITIVE_WEIGHT+")", 0, 100_000, PSO.DEFAULT_COGNITIVE_WEIGHT);
+        double socialWeight = Utils.getDoubleWithDefault("Peso social (Deixe em branco para manter o valor padrão "+PSO.DEFAULT_SOCIAL_WEIGHT+")", 0, 100_000, PSO.DEFAULT_SOCIAL_WEIGHT);
 
         PSO.StopConditionType stopCondition = getStopCondition();
         double conditionError = 0.0001;
@@ -60,21 +61,21 @@ public class MainPSO {
         pso.setRandom(random);
 
         if(stopCondition == PSO.StopConditionType.ACCEPTABLE_ERROR) {
-            conditionTarget = getDouble("Alvo", -10e9, 10e9);
-            conditionError = getDouble("Error", -10e9, 10e9);
+            conditionTarget = Utils.getDouble("Alvo", -10e9, 10e9);
+            conditionError = Utils.getDouble("Error", -10e9, 10e9);
 
             pso.setConditionTarget(conditionTarget);
             pso.setConditionError(conditionError);
 
         } else if(stopCondition == PSO.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == PSO.StopConditionType.FUNCTION_SLOPE) {
-            conditionWindow = getInt("Janela de interações", Integer.MIN_VALUE, Integer.MAX_VALUE);
-            conditionError = getDouble("Error", -10e9, 10e9);
+            conditionWindow = Utils.getInt("Janela de interações", Integer.MIN_VALUE, Integer.MAX_VALUE);
+            conditionError = Utils.getDouble("Error", -10e9, 10e9);
 
             pso.setConditionWindow(conditionWindow);
             pso.setConditionError(conditionError);
 
         } else if(stopCondition == PSO.StopConditionType.NORMALIZED_RADIUS) {
-            conditionError = getDouble("Error", -10e9, 10e9);
+            conditionError = Utils.getDouble("Error", -10e9, 10e9);
             pso.setConditionError(conditionError);
         }
 
@@ -150,32 +151,6 @@ public class MainPSO {
         return psoType;
     }
     
-    public static Function getFunction() {
-        String option;
-        Scanner in = new Scanner(System.in);
-        System.out.println("\nEscolha uma função");
-        System.out.println("1 - Function A f(x1,x2) = (x1 - 2)⁴ + (x1 - 2 * x2)²");
-        System.out.println("2 - Function B f(x1,x2) = (x1 - 1)² - 10 * cos(2 * π * x1) + x2² - 10 * cos(2 * π * x2)");
-        System.out.print("[ENTRADA]: ");
-        
-        while(true) {
-            option = in.nextLine();
-            option = option.trim();
-            if(!option.equals("1") && !option.equals("2")) {
-                LOGGER.error("Opção inválida\n");
-                System.out.print("[ENTRADA]: ");
-            } else {
-                break;
-            }
-        }
-        
-        if(option.equals("1")) {
-            return new Function(Function.FunctionType.FUNCTION_A);
-        } else {
-            return new Function(Function.FunctionType.FUNCTION_B);
-        }
-    }
-    
     public static PSO.StopConditionType getStopCondition() {
         String option;
         Scanner in = new Scanner(System.in);
@@ -212,92 +187,5 @@ public class MainPSO {
             default:
                 return PSO.StopConditionType.ONLY_ITERATION;
         }
-    }
-    
-    public static int getInt(String message, int start, int end) {
-        int value = 1;
-        Scanner in = new Scanner(System.in);
-        System.out.print("\n"+message+": ");
-        
-        while(true) {
-            String input = in.nextLine();
-            input = input.trim();
-            try{
-                value = Integer.parseInt(input);
-            } catch(NumberFormatException e) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-                continue;
-            }
-            
-            if(value < start || value > end) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-            } else {
-                break;
-            }
-        }
-        
-        return value;
-    }
-    
-    public static double getDoubleWithDefault(String message, double start, double end, double defaultValue) {
-        double value = defaultValue;
-        Scanner in = new Scanner(System.in);
-        System.out.print("\n"+message+": ");
-        
-        while(true) {
-            String input = in.nextLine();
-            input = input.trim();
-            if(input.trim().equals("")) {
-                break;
-            }
-            
-            try{
-                double number = Double.parseDouble(input);
-                value = number;
-            } catch(NumberFormatException e) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-                continue;
-            }
-            
-            if(value < start || value > end) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-            } else {
-                break;
-            }
-
-        }
-        return value;
-    }
-    
-    public static double getDouble(String message, double start, double end) {
-        double value = -1;
-        Scanner in = new Scanner(System.in);
-        System.out.print("\n"+message+": ");
-        
-        while(true) {
-            String input = in.nextLine();
-            input = input.trim();
-            try{
-                value = Double.parseDouble(input);
-            } catch(NumberFormatException e) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-                continue;
-            }
-            
-            if(value < start || value > end) {
-                LOGGER.error("Entrada inválida\n");
-                System.out.print(message+": ");
-            } else {
-                break;
-            }
-
-        }
-        return value;
-    }
-    
+    }   
 }

@@ -41,4 +41,14 @@ Para definir um seed:
 ```bash
 java -jar TCC.jar -Seed=<number>
 ```
+
+Para definir um algoritmo:
+```bash
+java -jar TCC.jar -Algorithm=<algorithm>
+```
+
+Para definir um arquivo json para realizar um batch de testes:
+```bash
+java -jar TCC.jar -FilePath=<filePath>
+```
 Todos comandos podem ser utilizados juntos.

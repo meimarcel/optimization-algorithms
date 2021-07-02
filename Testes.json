@@ -1,0 +1,42 @@
+[
+	{
+		"number_of_tests": 50,
+		"function": "FUNCTION_C",
+		"player_number": 10,
+		"substitute_number": 1,
+		"kicks_limit": 1000,
+		"begin_range": -100,
+		"end_range": 100,
+		"inertia_weight": 0.191,
+		"cognitive_weight": 0.191,
+		"social_weight": 0.618,
+		"move_off_probability": 0.1,
+		"move_forward_after_move_off_probability": 0.05,
+		"substitution_probability": 0.1,
+		"non_uniformity_degree": 1,
+		"function_minimum": 0,
+		"stop_condition_type": {
+			"type":"ONLY_ITERATION"
+		}
+	},
+	{
+		"number_of_tests": 50,
+		"function": "FUNCTION_D",
+		"player_number": 20,
+		"substitute_number": 6,
+		"kicks_limit": 1000,
+		"begin_range": -500,
+		"end_range": 500,
+		"inertia_weight": 0.191,
+		"cognitive_weight": 0.191,
+		"social_weight": 0.618,
+		"move_off_probability": 0.3,
+		"move_forward_after_move_off_probability": 0.05,
+		"substitution_probability": 0.1,
+		"non_uniformity_degree": 1,
+		"function_minimum": -12569.5,
+		"stop_condition_type": {
+			"type":"ONLY_ITERATION"
+		}
+	}
+]

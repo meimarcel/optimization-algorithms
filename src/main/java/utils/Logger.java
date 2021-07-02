@@ -43,6 +43,8 @@ public class Logger {
         header.append("-PlotGraph=true | To save the plotted graphs.\n");
         header.append("-SaveLog=true | To save all the logs.\n");
         header.append("-Seed=<number> | To set a seed to the random numbers generator. Replace <number> with a number of type long.\n");
+        header.append("-Algorithm=<algorithm> | To set the algorithm. Replace <algorithm> with the initials of of the algorithm.\n");
+        header.append("-FilePath=<filePath> | To set the json file path to make a batch of tests. Replace <filePath> with the path of the file.\n");
         System.out.print(header);
         System.out.println(this.ANSI_RESET);
         

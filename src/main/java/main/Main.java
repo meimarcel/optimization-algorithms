@@ -23,6 +23,8 @@ public class Main {
     private static boolean plotGraph = false;
     private static boolean saveLog = false;
     private static boolean error = false;
+    private static String algorithm = "";
+    private static String filePath = "";
     private static long seed;
     private static Logger LOGGER = new Logger();
     
@@ -40,37 +42,60 @@ public class Main {
         }
         
         if(error) System.exit(1);
-        Random random = new Random();
-        random.setSeed(seed);
         
-        String algorithm;
-        List<String> algorithms = Arrays.asList("0","1","2", "3");
-        while(true) {
-            System.out.println("\nEscolha um algoritmo");
-            System.out.println("1 - GENETIC ALGORITHM (GA)");
-            System.out.println("2 - PARTICLE SWARM OPTIMIZATION (PSO)");
-            System.out.println("3 - SOCCER GAME OPTIMIZATION (SGO)");
-            System.out.println("0 - CANCELAR");
-            System.out.print("[ENTRADA]: ");
-            algorithm = in.nextLine();
-            algorithm = algorithm.trim();
-            if(!algorithms.contains(algorithm)) {
-                LOGGER.error("Opção inválida\n");
-                System.out.print("[ENTRADA]: ");
-            } else {
-                break;
+        if(!filePath.equals("")) {
+            switch(algorithm) {
+                case "GA":
+                    MainGA.run(plotGraph, saveLog, seed, log.toString());
+                    break;
+                case "PSO":
+                    MainPSO.run(plotGraph, saveLog, seed, log.toString());
+                    break;
+                case "SGO":
+                    MainSGO.runFile(plotGraph, saveLog, seed, log.toString(), filePath);
             }
-        }
-        
-        switch(algorithm) {
-            case "1":
-                MainGA.run(plotGraph, saveLog, seed, algorithm);
-                break;
-            case "2":
-                MainPSO.run(plotGraph, saveLog, seed, algorithm);
-                break;
-            case "3":
-                MainSGO.run(plotGraph, saveLog, seed, algorithm);
+        } else {
+            if(algorithm.equals("")) {
+                List<String> algorithms = Arrays.asList("0","1","2", "3");
+                while(true) {
+                    System.out.println("\nEscolha um algoritmo");
+                    System.out.println("1 - GENETIC ALGORITHM (GA)");
+                    System.out.println("2 - PARTICLE SWARM OPTIMIZATION (PSO)");
+                    System.out.println("3 - SOCCER GAME OPTIMIZATION (SGO)");
+                    System.out.println("0 - CANCELAR");
+                    System.out.print("[ENTRADA]: ");
+                    algorithm = in.nextLine();
+                    algorithm = algorithm.trim();
+                    if(!algorithms.contains(algorithm)) {
+                        LOGGER.error("Opção inválida\n");
+                        System.out.print("[ENTRADA]: ");
+                    } else {
+                        switch(algorithm) {
+                            case "1":
+                                algorithm = "GA";
+                                break;
+                            case "2":
+                                algorithm = "PSO";
+                                break;
+                            case "3":
+                                algorithm = "SGO";
+                                break;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            switch(algorithm) {
+                case "GA":
+                    MainGA.run(plotGraph, saveLog, seed, log.toString());
+                    break;
+                case "PSO":
+                    MainPSO.run(plotGraph, saveLog, seed, log.toString());
+                    break;
+                case "SGO":
+                    MainSGO.run(plotGraph, saveLog, seed, log.toString());
+            }
         }
     }
     
@@ -111,6 +136,25 @@ public class Main {
                 LOGGER.error("Invalid value in '"+var+"'\n");
                 error = true;
             }
+        } else if(values[0].equals("-Algorithm")) {
+            if(values[1].toUpperCase().equals("GA") || values[1].toUpperCase().equals("PSO") || 
+                    values[1].toUpperCase().equals("SGO")) {
+                algorithm = values[1]; 
+                LOGGER.info(values[1].toUpperCase()+" selected\n");
+            } else {
+                LOGGER.error("Invalid value in '"+var+"'\n");
+                error = true;
+            }
+            
+        } else if(values[0].equals("-FilePath")) {
+            if(!values[1].trim().equals("") && values[1].trim().endsWith(".json")) {
+                filePath = values[1]; 
+                LOGGER.info("Path setted: "+filePath+"\n");
+            } else {
+                LOGGER.error("Invalid value in '"+var+"'\n");
+                error = true;
+            }
+            
         } else {
             LOGGER.error("Invalid argument '"+var+"'\n");
             error = true;
