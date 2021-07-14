@@ -255,6 +255,99 @@ public class GA {
         return log.toString();
     }
     
+    public String runGAFile(int testNumber) {
+        StringBuilder log = new StringBuilder();
+        
+        if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || this.stopCondition == StopConditionType.FUNCTION_SLOPE || this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) {
+            this.conditionList = new ArrayList<>();
+        }
+        
+        Individual population[] = this.initialize();
+        this.globalBestIndividual = population[0];
+        this.bestIteration = 0;
+        
+        long startTime = System.nanoTime();
+        int i = 0;
+        for(; i < this.iterationLimit && this.stopConditionEvaluete(); ++i) {
+            Individual sortedPopulation[] = Arrays.copyOf(population, this.numberOfPopulation);
+            Arrays.sort(sortedPopulation);
+            this.localBestIndividual = sortedPopulation[0];
+            
+            if(this.globalBestIndividual.getEval() > this.localBestIndividual.getEval()) {
+                this.globalBestIndividual = this.localBestIndividual;
+                this.bestIteration = i;
+            }
+            
+            this.conditionFit = this.localBestIndividual.getEval();
+            if(this.stopCondition == StopConditionType.FUNCTION_SLOPE || this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                this.conditionList.add(this.localBestIndividual.getEval());
+            }
+            
+            Individual newPopulation[] = new Individual[this.numberOfPopulation];
+            int index = 0;
+            
+            for(; index < this.elitism; ++index) {
+                newPopulation[index] = population[index];
+            }
+            
+            while(index < this.numberOfPopulation) {
+                Individual parent1 = this.select(population, sortedPopulation[0]);
+                Individual parent2 = this.select(population, sortedPopulation[0]);
+                while(parent1.equals(parent2)) {
+                    parent2 = this.select(population, sortedPopulation[0]);
+                }
+                Individual children[]  = this.crossover(parent1, parent2);
+                
+                for(int j = 0; j < children.length; ++j) {
+                    children[j] = this.mutate(children[j]);
+                }
+                
+                newPopulation[index++] = children[0];
+                if(children.length == 2 && index < this.numberOfPopulation) {
+                    newPopulation[index++] = children[1];
+                }
+            }
+            this.totalEval = -1;
+            
+            if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) {
+                double sumDist = 0;
+                Individual sortedNewPopulation[] = Arrays.copyOf(newPopulation, newPopulation.length);
+                Arrays.sort(sortedNewPopulation);
+                for(int j = 0; j < this.numberOfPopulation; ++j) {    
+                    double dist = 0;
+                    double genesOld[] = sortedPopulation[j].getGenes();
+                    double genesNew[] = sortedNewPopulation[j].getGenes();
+                    for(int k = 0; k < this.function.getNumberOfVariables(); ++k) {
+                         dist += ((genesOld[k] - genesNew[k]) * (genesOld[k] - genesNew[k]));
+                    }
+                    dist = Math.sqrt(dist);
+                    sumDist += dist;
+                }
+                this.conditionList.add(sumDist / (double) this.numberOfPopulation);
+            }
+            
+            population = Arrays.copyOf(newPopulation, this.numberOfPopulation);
+            
+        }  
+        long stopTime = System.nanoTime();
+        log.append(LOGGER.message("Test: "+testNumber+"\n"));
+        log.append(LOGGER.message("Best Iteration = "+this.bestIteration+"\n"));
+        log.append(LOGGER.message("Best Eval = "+this.globalBestIndividual.getEval()+"\n"));
+        log.append(LOGGER.message("Final Best Positions = ["));
+        double[] genes = this.globalBestIndividual.getGenes();
+        int end = genes.length - 1;
+        System.out.print(LOGGER.ANSI_CYAN);
+        for(int j = 0; j < end; ++j) {
+            log.append(genes[j]).append(", ");
+            System.out.print(genes[j]+", ");
+        }
+        log.append(genes[end]).append("]\n");
+        System.out.print(genes[end]+"]\n");
+        log.append(LOGGER.message("Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
+        
+        return log.toString();
+    }
+    
     
     private double[] setUniformDistribution() {
         double[] genes = new double[this.function.getNumberOfVariables()];
@@ -428,6 +521,10 @@ public class GA {
     
     public void setRandom(Random random) {
         rand = random;
+    }
+    
+    public double getGlobalBestEval() {
+        return this.globalBestIndividual.getEval();
     }
     
     private boolean stopConditionEvaluete() {

@@ -46,10 +46,10 @@ public class Main {
         if(!filePath.equals("")) {
             switch(algorithm) {
                 case "GA":
-                    MainGA.run(plotGraph, saveLog, seed, log.toString());
+                    MainGA.runFile(plotGraph, saveLog, seed, log.toString(), filePath);
                     break;
                 case "PSO":
-                    MainPSO.run(plotGraph, saveLog, seed, log.toString());
+                    MainPSO.runFile(plotGraph, saveLog, seed, log.toString(), filePath);
                     break;
                 case "SGO":
                     MainSGO.runFile(plotGraph, saveLog, seed, log.toString(), filePath);

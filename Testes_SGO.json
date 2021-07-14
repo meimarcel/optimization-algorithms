@@ -24,7 +24,7 @@
 		"function": "FUNCTION_D",
 		"player_number": 20,
 		"substitute_number": 6,
-		"kicks_limit": 1000,
+		"kicks_limit": 500,
 		"begin_range": -500,
 		"end_range": 500,
 		"inertia_weight": 0.191,

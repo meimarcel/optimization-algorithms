@@ -376,8 +376,8 @@ public class SGO {
             log.append(this.globalBestPosition[j]).append(", ");
             System.out.print(this.globalBestPosition[j]+", ");
         }
-        log.append(this.globalBestPosition[end]).append("] ");
-        System.out.print(this.globalBestPosition[end]+"] ");
+        log.append(this.globalBestPosition[end]).append("]\n");
+        System.out.print(this.globalBestPosition[end]+"]\n");
         log.append(LOGGER.message("Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
         
         return log.toString();

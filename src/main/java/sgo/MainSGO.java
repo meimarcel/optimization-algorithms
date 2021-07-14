@@ -217,6 +217,8 @@ public class MainSGO {
                 System.out.println("");
                 
                 List<Double> evalList = new ArrayList<>();
+                int bestTest = 0;
+                double bestEval = Integer.MAX_VALUE;
                 
                 for(int i = 1; i <= numberOfTests; ++i) {
                     SGO sgo = new SGO(playerNumber, substituteNumber, kicksLimit, inertiaWeight, 
@@ -239,6 +241,10 @@ public class MainSGO {
 
                     log.append(sgo.runSGOFile(i));
                     evalList.add(sgo.getGlobalBestEval());
+                    if(sgo.getGlobalBestEval() < bestEval) {
+                        bestTest = i;
+                        bestEval = sgo.getGlobalBestEval();
+                    }
                 }
                 
                 double meanError = 0;
@@ -261,6 +267,7 @@ public class MainSGO {
                 
                 log.append("\n");
                 log.append(LOGGER.message("---------------------------RESULT---------------------------\n"));
+                log.append(LOGGER.message("Best Test = "+bestTest+" Eval = "+bestEval+"\n"));
                 log.append(LOGGER.message("Mean = "+mean+"\n"));
                 log.append(LOGGER.message("Average Error = "+meanError+"\n"));
                 log.append(LOGGER.message("Standar Deviation = "+standardDeviation+"\n"));

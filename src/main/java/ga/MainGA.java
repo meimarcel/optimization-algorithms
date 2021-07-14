@@ -6,8 +6,16 @@
 package ga;
 
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +42,7 @@ public class MainGA {
         Random random = new Random();
         random.setSeed(seedDefined);
         
-        int numberOfPopulation = Utils.getInt("Tamanho da poulação[1 - 1000]", 1, 1000);
+        int numberOfPopulation = Utils.getInt("Tamanho da poulação[1 - 1000]", 1, 10_000);
         int iterationLimit = Utils.getInt("Número máximo de iterações[1 - 100.000]", 1, 100_000);
         Function function = Utils.getFunction();
 
@@ -108,6 +116,162 @@ public class MainGA {
         }
     }
     
+    public static void runFile(boolean plotGraph, boolean saveLog, long seedDefined, String header, String filePath) {
+        StringBuilder log = new StringBuilder();
+        log.append(header);
+        log.append("\n");
+        log.append(LOGGER.headerGA());
+        
+        Random random = new Random();
+        random.setSeed(seedDefined);
+        
+        try {
+            BufferedReader bf = new BufferedReader(new FileReader(filePath));
+            Gson gson = new Gson();
+            JsonArray jsonObj = gson.fromJson(bf, JsonArray.class);
+            int caseIndex = 1;
+            long startTime = System.nanoTime();
+            for(JsonElement testCase : jsonObj) {
+                JsonObject json = testCase.getAsJsonObject();
+                
+                int numberOfTests = Utils.parseInt("number_of_tests", json.get("number_of_tests").getAsInt(), 1, 100000);
+                int numberOfPopulation = Utils.parseInt("number_of_population", json.get("number_of_population").getAsInt(), 1, 10_000);
+                int iterationLimit = Utils.parseInt("iteration_limit", json.get("iteration_limit").getAsInt(), 1, 100_000);
+                Function function = Utils.parseFunction(json.get("function").getAsString());
+
+                double beginRange = Utils.parseDouble("begin_range", json.get("begin_range").getAsDouble(), -100_000, 100_000);
+                double endRange = Utils.parseDouble("end_range", json.get("end_range").getAsDouble(), -100_000, 100_000);
+                double crossoverProbability = Utils.parseDouble("crossover_probability", json.get("crossover_probability").getAsDouble(), 0, 1);
+                double mutationProbability = Utils.parseDouble("mutation_probability", json.get("mutation_probability").getAsDouble(), 0, 1);
+                int elitism = Utils.parseInt("elitism", json.get("elitism").getAsInt(), 0, numberOfPopulation);
+                double functionMinimum = Utils.parseDouble("function_minimum", json.get("function_minimum").getAsDouble(), -10e9, 10e9);
+
+                GA.CrossoverType crossoverType = parseCrossoverType(json.get("crossover_type").getAsString());
+                GA.SelectionType selectionType = parseSelectionType(json.get("selection_type").getAsString());
+                        
+                JsonObject stopConditionTypeJson = json.get("stop_condition_type").getAsJsonObject();
+                GA.StopConditionType stopCondition = parseStopCondition(stopConditionTypeJson.get("type").getAsString());
+                double conditionError = 0.0001;
+                double conditionTarget = 0;
+                int conditionWindow = 20;
+
+                if(stopCondition == GA.StopConditionType.ACCEPTABLE_ERROR) {
+                    conditionTarget = Utils.parseDouble("target", stopConditionTypeJson.get("target").getAsDouble(), -10e9, 10e9);
+                    conditionError = Utils.parseDouble("error", stopConditionTypeJson.get("error").getAsDouble(), -10e9, 10e9);
+
+                } else if(stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == GA.StopConditionType.FUNCTION_SLOPE || stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) {
+                    conditionWindow = Utils.parseInt("iteration_window", stopConditionTypeJson.get("iteration_window").getAsInt(),Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    conditionError = Utils.parseDouble("error", stopConditionTypeJson.get("error").getAsDouble(), -10e9, 10e9);
+
+                }
+
+                System.out.println("");
+                log.append(LOGGER.white("---------------------------CASE: "+(caseIndex++)+"---------------------------\n"));
+                log.append("\n");
+                log.append(LOGGER.info("Function: "+function.getStringFunction()+"\n"));
+                log.append(LOGGER.info("Number of population: "+numberOfPopulation+"\n"));
+                log.append(LOGGER.info("Iteration Limit: "+iterationLimit+"\n"));
+                log.append(LOGGER.info("Begin Range: "+beginRange+"\n"));
+                log.append(LOGGER.info("End Range: "+endRange+"\n"));
+                log.append(LOGGER.info("Crossover Probability: "+crossoverProbability+"\n"));
+                log.append(LOGGER.info("Mutation Probability: "+mutationProbability+"\n"));
+                log.append(LOGGER.info("Elitism: "+elitism+"\n"));
+                log.append(LOGGER.info("Stop Condition: "+stopCondition+"\n"));
+                log.append(LOGGER.info("Crossover Type: "+crossoverType+"\n"));
+                log.append(LOGGER.info("Selectio Type: "+selectionType+"\n"));
+
+                if(stopCondition == GA.StopConditionType.ACCEPTABLE_ERROR) {
+                    log.append(LOGGER.info("Target: "+conditionTarget+"\n"));
+                    log.append(LOGGER.info("Error: "+conditionError+"\n"));
+
+                } else if(stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == GA.StopConditionType.FUNCTION_SLOPE || stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) {
+                    log.append(LOGGER.info("Iteration Window: "+conditionWindow+"\n"));
+                    log.append(LOGGER.info("Error: "+conditionError+"\n"));
+
+                }
+                System.out.println("");
+                log.append("\n");
+                log.append(LOGGER.white("---------------------------EXECUTING---------------------------\n"));
+                log.append("\n");
+                System.out.println("");
+                
+                List<Double> evalList = new ArrayList<>();
+                int bestTest = 0;
+                double bestEval = Integer.MAX_VALUE;
+                
+                for(int i = 1; i <= numberOfTests; ++i) {
+                    GA ga = new GA(numberOfPopulation, iterationLimit, crossoverProbability, mutationProbability, beginRange, endRange, elitism, crossoverType, function, selectionType);
+                    ga.setStopConditionType(stopCondition);
+                    ga.setRandom(random);
+ 
+                    if(stopCondition == GA.StopConditionType.ACCEPTABLE_ERROR) {
+                        ga.setConditionTarget(conditionTarget);
+                        ga.setConditionError(conditionError);
+
+                    } else if(stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || stopCondition == GA.StopConditionType.FUNCTION_SLOPE || stopCondition == GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION) { 
+                        ga.setConditionWindow(conditionWindow);
+                        ga.setConditionError(conditionError);
+
+                    }
+
+                    log.append(ga.runGAFile(i));
+                    evalList.add(ga.getGlobalBestEval());
+                    if(ga.getGlobalBestEval() < bestEval) {
+                        bestTest = i;
+                        bestEval = ga.getGlobalBestEval();
+                    }
+                }
+                
+                double meanError = 0;
+                double standardDeviation = 0;
+                for(int i = 0; i < numberOfTests; ++i) {
+                    meanError += Math.abs(evalList.get(i) - functionMinimum);
+                }
+                meanError /= numberOfTests;
+                
+                double mean = 0;
+                for(int i = 0; i < numberOfTests; ++i) {
+                    mean += evalList.get(i);
+                }
+                mean /= numberOfTests;
+                
+                for(int i = 0; i < numberOfTests; ++i) {
+                    standardDeviation += ((evalList.get(i) - mean) * (evalList.get(i) - mean));
+                }
+                standardDeviation = Math.sqrt(standardDeviation / numberOfTests);
+                
+                log.append("\n");
+                log.append(LOGGER.message("---------------------------RESULT---------------------------\n"));
+                log.append(LOGGER.message("Best Test = "+bestTest+" Eval = "+bestEval+"\n"));
+                log.append(LOGGER.message("Mean = "+mean+"\n"));
+                log.append(LOGGER.message("Average Error = "+meanError+"\n"));
+                log.append(LOGGER.message("Standar Deviation = "+standardDeviation+"\n"));
+                log.append("\n");
+                log.append(LOGGER.message("------------------------------------------------------------\n"));
+                log.append("\n");
+            }
+            long stopTime = System.nanoTime();
+            
+            log.append(LOGGER.message("Total Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
+            log.append(LOGGER.message("---------------------------COMPLETE---------------------------\n"));
+            if(plotGraph) {
+                /*Plotter plotter = new Plotter(dataFit, dataMean, dataStandardDeviation);
+                plotter.start();*/
+            }
+            
+            if(saveLog) {
+                String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+                FileManager.Write(FileSystems.getDefault().getPath("").toAbsolutePath()+"/data/"+timeStamp, "log.txt", log.toString());
+            }
+        } catch (FileNotFoundException e) {
+            LOGGER.error("Não foi possível abrir o arquivo em " + filePath+"\n");   
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("JSON malformatado: "+e.getMessage()+"\n"); 
+        }
+        
+    }
+    
     public static GA.StopConditionType getStopCondition() {
         String option;
         Scanner in = new Scanner(System.in);
@@ -146,6 +310,23 @@ public class MainGA {
         }
     }
     
+    public static GA.StopConditionType parseStopCondition(String stopCondition) {
+        switch(stopCondition) {
+            case "ONLY_ITERATION":
+                return GA.StopConditionType.ONLY_ITERATION;
+            case "ACCEPTABLE_ERROR":
+                return GA.StopConditionType.ACCEPTABLE_ERROR;
+            case "NUMBER_OF_ITERATION_IMPROVEMENT":
+                return GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT;
+            case "NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION":
+                return GA.StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT_POPULATION;
+            case "FUNCTION_SLOPE":
+                return GA.StopConditionType.FUNCTION_SLOPE;
+            default:
+                throw new RuntimeException("Stop Condition Type Not Found");
+        }
+    }
+    
     public static GA.CrossoverType getCrossoverType() {
         String option;
         Scanner in = new Scanner(System.in);
@@ -181,6 +362,21 @@ public class MainGA {
         }
     }
     
+    public static GA.CrossoverType parseCrossoverType(String crossoverType) {
+        switch(crossoverType) {
+            case "ARITHMETIC_MEAN":
+                return GA.CrossoverType.ARITHMETIC_MEAN;
+            case "WEIGHTED_MEAN":
+                return GA.CrossoverType.WEIGHTED_MEAN;
+            case "ONE_POINT":
+                return GA.CrossoverType.ONE_POINT;
+            case "TWO_POINT":
+                return GA.CrossoverType.TWO_POINT;
+            default:
+                throw new RuntimeException("Crossover Type Not Found");
+        }
+    }
+    
     public static GA.SelectionType getSelectionType() {
         String option;
         Scanner in = new Scanner(System.in);
@@ -207,6 +403,17 @@ public class MainGA {
                 return GA.SelectionType.TOURNAMENT;
             default:
                 return GA.SelectionType.TOURNAMENT;
+        }
+    }
+    
+    public static GA.SelectionType parseSelectionType(String selectionType) {
+        switch(selectionType) {
+            case "ROULETTE_WHEEL":
+                return GA.SelectionType.ROULETTE_WHEEL;
+            case "TOURNAMENT":
+                return GA.SelectionType.TOURNAMENT;
+            default:
+                throw new RuntimeException("Selection Type Not Found");
         }
     }  
 }

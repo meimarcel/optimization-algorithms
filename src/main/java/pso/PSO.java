@@ -257,6 +257,96 @@ public class PSO {
         return log.toString();
     }
     
+    public String runGBestPSOFile(int testNumber) {
+        StringBuilder log = new StringBuilder();
+        
+        if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+            this.conditionList = new ArrayList<>();
+        }
+        
+        Particle[] particles = this.initialize();
+        
+        long startTime = System.nanoTime(); 
+        int i = 0;
+        for(; i < this.iterationLimit && this.stopConditionEvaluete(); ++i) {            
+            for(Particle p : particles) {
+                p.calculatePersonalBest();
+                if(p.getBestEval() < this.globalBestEval) {
+                    this.globalBestEval = p.getBestEval();
+                    this.globalBestPosition = p.getBestPosition();
+                }
+            }
+            
+            this.conditionFit = this.globalBestEval;
+            if(this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+                this.conditionList.add(this.globalBestEval);
+            }
+            
+            double sumPositions = 0;
+            for(Particle p : particles) {
+                double velocity[] = p.getVelocity();
+                double personalBestPosition[] = p.getBestPosition();
+                double position[] = p.getPosition();
+                
+                for(int j = 0; j < velocity.length; ++j) {
+                    double c1r1 = this.cognitiveWeight * rand.nextDouble();
+                    double c2r2 = this.socialWeight * rand.nextDouble();
+                    velocity[j] = (this.inertiaWeight * velocity[j]) + 
+                            (c1r1 * (personalBestPosition[j] - position[j])) +
+                            (c2r2 * (this.globalBestPosition[j] - position[j]));
+                }
+                
+                p.setVelocity(velocity);
+                p.movePositions();
+                
+                if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                    double dist = 0;
+                    double currentPosition[] = p.getPosition();
+                    for(int j = 0; j < currentPosition.length; ++j) {
+                         dist += ((currentPosition[j] - position[j]) * (currentPosition[j] - position[j]));
+                    }
+                    dist = Math.sqrt(dist);
+                    sumPositions += dist;
+                }
+            }            
+            
+            if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                this.conditionList.add(sumPositions / (double) this.particleNumber);
+            }
+            
+            if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
+                this.conditionMaxRadius = -1;
+                for(Particle p : particles) {
+                    double radius = 0;
+                    double positions[] = p.getPosition(); 
+                    for(int j = 0; j < positions.length; ++j) {
+                         radius += ((positions[j] - this.globalBestPosition[j]) * (positions[j] - this.globalBestPosition[j]));
+                    }
+                    radius = Math.sqrt(radius);
+                    if(this.conditionMaxRadius < radius) {
+                        this.conditionMaxRadius = radius;
+                    }
+                }
+            }
+            
+        }  
+        long stopTime = System.nanoTime();
+        log.append(LOGGER.message("Test: "+testNumber+"\n"));
+        log.append(LOGGER.message("Best Eval = "+this.globalBestEval+"\n"));
+        log.append(LOGGER.message("Final Best Positions = ["));
+        int end = this.globalBestPosition.length - 1;
+        System.out.print(LOGGER.ANSI_CYAN);
+        for(int j = 0; j < end; ++j) {
+            log.append(this.globalBestPosition[j]).append(", ");
+            System.out.print(this.globalBestPosition[j]+", ");
+        }
+        log.append(this.globalBestPosition[end]).append("]\n");
+        System.out.print(this.globalBestPosition[end]+"]\n");
+        log.append(LOGGER.message("Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
+        
+        return log.toString();
+    }
+    
     public String runLBestPSO() {
         StringBuilder log = new StringBuilder();
         long startTime = System.nanoTime();
@@ -444,6 +534,119 @@ public class PSO {
         return log.toString();
     }
     
+    public String runLBestPSOFile(int testNumber) {
+        StringBuilder log = new StringBuilder();
+        
+        
+        if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT || this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+            this.conditionList = new ArrayList<>();
+        }
+        
+        Particle[] particles = this.initialize();
+        
+        long startTime = System.nanoTime();
+        int i = 0;
+        for(; i < this.iterationLimit && this.stopConditionEvaluete(); ++i) {
+            for(Particle p : particles) {
+                p.calculatePersonalBest();
+                if(p.getBestEval() < this.globalBestEval) {
+                    this.globalBestEval = p.getBestEval();
+                    this.globalBestPosition = p.getBestPosition();
+                }
+            }
+            
+            this.conditionFit = this.globalBestEval;
+            if(this.stopCondition == StopConditionType.FUNCTION_SLOPE) {
+                this.conditionList.add(this.globalBestEval);
+            }
+            
+            double sumPositions = 0;
+            Particle particlesAux[] = Arrays.copyOf(particles, particles.length);
+            for(int k = 0; k < particles.length; ++k) {
+                double velocity[] = particles[k].getVelocity();
+                double personalBestPosition[] = particles[k].getBestPosition();
+                double position[] = particles[k].getPosition();
+                double neighborhoodBestPosition[] = new double[particles[k].getNumberOfVariables()];
+                double neighborhoodBestFit = Integer.MAX_VALUE;
+                
+                int neighborhoodStart = (this.neighborhoodSize%2 == 0) ? (k - (this.neighborhoodSize / 2) + 1) : (k - (this.neighborhoodSize / 2)); 
+                neighborhoodStart = Math.max(0, neighborhoodStart);
+                int neighborhoodEnd = Math.min(this.particleNumber-1, k + (this.neighborhoodSize / 2));
+                
+                for(int j = neighborhoodStart; j < k; ++j) {
+                    if(particlesAux[j].getBestEval() < neighborhoodBestFit) {
+                        neighborhoodBestFit = particlesAux[j].getBestEval();
+                        neighborhoodBestPosition = particlesAux[j].getBestPosition();
+                    }
+                }
+                
+                for(int j = k; j < neighborhoodEnd; ++j) {
+                    if(particlesAux[j].getBestEval() < neighborhoodBestFit) {
+                        neighborhoodBestFit = particlesAux[j].getBestEval();
+                        neighborhoodBestPosition = particlesAux[j].getBestPosition();
+                    }
+                }
+                
+                for(int j = 0; j < velocity.length; ++j) {
+                    double c1r1 = this.cognitiveWeight * rand.nextDouble();
+                    double c2r2 = this.socialWeight * rand.nextDouble();
+                    velocity[j] = (this.inertiaWeight * velocity[j]) + 
+                            (c1r1 * (personalBestPosition[j] - position[j])) +
+                            (c2r2 * (neighborhoodBestPosition[j] - position[j]));
+                }
+                
+                particles[k].setVelocity(velocity);
+                particles[k].movePositions();
+                
+                if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                    double dist = 0;
+                    double currentPosition[] = particles[k].getPosition();
+                    for(int j = 0; j < currentPosition.length; ++j) {
+                         dist += ((currentPosition[j] - position[j]) * (currentPosition[j] - position[j]));
+                    }
+                    dist = Math.sqrt(dist);
+                    sumPositions += dist;
+                }
+                
+            }
+       
+            if(this.stopCondition == StopConditionType.NUMBER_OF_ITERATION_IMPROVEMENT) {
+                this.conditionList.add(sumPositions / (double) this.particleNumber);
+            }
+            
+            if(this.stopCondition == StopConditionType.NORMALIZED_RADIUS) {
+                this.conditionMaxRadius = -1;
+                for(Particle p : particles) {
+                    double radius = 0;
+                    double positions[] = p.getPosition(); 
+                    for(int j = 0; j < positions.length; ++j) {
+                         radius += ((positions[j] - this.globalBestPosition[j]) * (positions[j] - this.globalBestPosition[j]));
+                    }
+                    radius = Math.sqrt(radius);
+                    if(this.conditionMaxRadius < radius) {
+                        this.conditionMaxRadius = radius;
+                    }
+                }
+            }
+            
+        }
+        long stopTime = System.nanoTime();
+        log.append(LOGGER.message("Test: "+testNumber+"\n"));
+        log.append(LOGGER.message("Best Eval = "+this.globalBestEval+"\n"));
+        log.append(LOGGER.message("Final Best Positions = ["));
+        int end = this.globalBestPosition.length - 1;
+        System.out.print(LOGGER.ANSI_CYAN);
+        for(int j = 0; j < end; ++j) {
+            log.append(this.globalBestPosition[j]).append(", ");
+            System.out.print(this.globalBestPosition[j]+", ");
+        }
+        log.append(this.globalBestPosition[end]).append("]\n");
+        System.out.print(this.globalBestPosition[end]+"]\n");
+        log.append(LOGGER.message("Execution time: "+ ((stopTime - startTime) / 1000000) + " ms\n"));
+        
+        return log.toString();
+    }
+    
     public Particle[] initialize() {
         Particle[] particles = new Particle[this.particleNumber];
         for(int i = 0; i < this.particleNumber; ++i) {
@@ -503,6 +706,10 @@ public class PSO {
     
     public void setRandom(Random random) {
         rand = random;
+    }
+    
+    public double getGlobalBestEval() {
+        return this.globalBestEval;
     }
     
     public boolean stopConditionEvaluete() {
