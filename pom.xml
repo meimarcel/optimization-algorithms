@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mycompany</groupId>
-    <artifactId>TCC</artifactId>
+    <artifactId>OptimizationAlgorithms</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>TCC</name>
+    <name>OptimizationAlgorithms</name>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -61,7 +61,7 @@
                     <Class-Path>.</Class-Path>
                 </manifestEntries>
               </archive>
-              <finalName>TCC/TCC</finalName>
+              <finalName>OptimizationAlgorithms/OptimizationAlgorithms</finalName>
             </configuration>
 
           </plugin>
@@ -76,7 +76,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/TCC/lib</outputDirectory>
+                            <outputDirectory>${project.build.directory}/OptimizationAlgorithms/lib</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>

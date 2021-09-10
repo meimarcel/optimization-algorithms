@@ -140,7 +140,7 @@ public class MainPSO {
         StringBuilder log = new StringBuilder();
         log.append(header);
         log.append("\n");
-        log.append(LOGGER.headerGA());
+        log.append(LOGGER.headerPSO());
         
         Random random = new Random();
         random.setSeed(seedDefined);
