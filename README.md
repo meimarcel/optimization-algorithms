@@ -20,7 +20,7 @@ Para executar o algoritmo, baixe o projeto e execute o seguinte comando para faz
 ```bash
 mvn package
 ```
-Depois de ter feito o build, vá até a pasta **target/TCC/** e execute o seguinte comando para executar o projeto:
+Depois de ter feito o build, vá até a pasta **target/OptimizationAlgorithms/** e execute o seguinte comando para executar o projeto:
 ```bash
 java -jar TCC.jar
 ```
